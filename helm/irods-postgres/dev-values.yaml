@@ -1,0 +1,78 @@
+# SPDX-FileCopyrightText: 2022 Renaissance Computing Institute. All rights reserved.
+# SPDX-FileCopyrightText: 2023 Renaissance Computing Institute. All rights reserved.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: LicenseRef-RENCI
+# SPDX-License-Identifier: MIT
+
+# Default values for irods-postgres.
+# This is a YAML-formatted file.
+replicaCount: 1
+
+image:
+  # using the postgis image, postgres v15.
+  repository: postgres
+  tag: "10.12"
+  pullPolicy: IfNotPresent
+
+backupImage:
+  repository: containers.renci.org/irods/db-backup-job
+  tag: "latest"
+  pullPolicy: Always
+
+backup:
+  enable: false
+
+# credentials for the default user
+adminUser: "postgres"
+adminPassword: "Brtyre65!"
+
+sqlFile1: "dbglobals.sql.1"
+sqlFile2: "somedb.dump.1"
+
+# will invoke a DB restore when set
+# there is a script of k8s commands to move DB dump files around in /deploy/other/DB/move_db_files.sh.
+# suggest to drop the deployment and data PV before doing a restore.
+restoreDB: false
+
+# DB startup credentials
+user: postgres
+password: "40F90D00FD"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+storage:
+  create: true
+  name: irods-db-vol
+  claimName: irods-db-pvc
+  size: 5Gi
+  accessMode: "ReadWriteMany"
+  mountPoint: /var/lib/postgresql/data
+
+podSecurityContext:
+  fsGroup: 999
+
+securityContext:
+  runAsUser: 999
+  runAsNonRoot: true
+
+backupSecurityContext:
+  runAsUser: 1000
+  fsGroup: 1000
+  runAsGroup: 1000
+
+volumes:
+  name: data-vol
+  claimName: irods-pvc
+
+service:
+  type: ClusterIP
+  port: 5432
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
