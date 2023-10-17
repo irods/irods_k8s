@@ -49,11 +49,11 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          - mountPath: {{ .Values.dataMountPath }}
-            name: {{ .Values.storage.name }}
+          - name: {{ .Values.storage.name }}
+            mountPath: {{ .Values.dataMountPath }}
           {{- if .Values.shmSize }}
-          - mountPath: /dev/shm
-            name: dshm
+          - name: dshm
+            mountPath: /dev/shm
           {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

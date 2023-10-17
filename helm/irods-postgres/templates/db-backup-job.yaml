@@ -26,29 +26,20 @@ spec:
             command: ['bash', './dumpDatabase.sh']
             env:
             - name: LOG_PATH
-              valueFrom:
-                secretKeyRef:
-                  name: irods-keys
-                  key: log-path
+              value: "/data/logs"
             - name: IRODS_DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: irods-keys
-                  key: irods-db-host
+              value: {{ include "irods-postgres.fullname" . | quote }}
             - name: IRODS_DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: irods-keys
-                  key: irods-db-port
+              value: "5432"
             - name: PGUSER
-              value: {{ .Values.adminUser }}
+              value: {{ .Values.adminUser | quote }}
             - name: PGPASSWORD
-              value: {{ .Values.adminPassword }}
+              value: {{ .Values.adminPassword | quote }}
           restartPolicy: Never
           volumes:
             - name: {{ .Values.volumes.name }}
               persistentVolumeClaim:
-                claimName: {{ include "irods-postgres.fullname" . }}-pvc
+                claimName: {{ .Values.volumes.claimName }}
             - name: backup-script
               configMap:
                 name: "{{- include "irods-postgres.fullname" . }}-scripts"

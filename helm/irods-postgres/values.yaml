@@ -43,6 +43,7 @@ storage:
   name: vol
   claimName: pvc
   size: 1Gi
+  backupSize: 10Gi
   accessMode: "ReadWriteMany"
   mountPoint: /somedir
 

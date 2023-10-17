@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: loader-container
-        image: "{{ .Values.image.repository}}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository}}:{{ .Values.image.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command:
         - /loaddb.sh
@@ -38,7 +38,7 @@ spec:
       volumes:
       - name: {{ .Values.volumes.name }}
         persistentVolumeClaim:
-          claimName: {{ include "irods-postgres.fullname" . }}-pvc
+          claimName: {{ .Values.volumes.claimName }}
       - name: loader-script
         configMap:
           name: "{{- include "irods-postgres.fullname" . }}-scripts"
