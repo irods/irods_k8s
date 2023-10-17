@@ -16,7 +16,7 @@
    - https://github.com/irods/irods_testing_environment
    - https://irods.org/uploads/2022/King-iRODS-iRODS_Development_and_Testing_Environments-v8-slides.pdf
    - https://www.youtube.com/watch?v=tm6DY83KWW0
- - Use Phil’s APSViz Supervisor
+ - Use Phil’s APSViz k8s Job Supervisor
    - https://github.com/RENCI/APSViz-Supervisor
  - Use RENCI’s Sterling cluster
 

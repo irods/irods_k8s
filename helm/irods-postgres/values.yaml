@@ -1,10 +1,3 @@
-# SPDX-FileCopyrightText: 2022 Renaissance Computing Institute. All rights reserved.
-# SPDX-FileCopyrightText: 2023 Renaissance Computing Institute. All rights reserved.
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-# SPDX-License-Identifier: LicenseRef-RENCI
-# SPDX-License-Identifier: MIT
-
 # Default values for irods-postgres.
 # This is a YAML-formatted file.
 
@@ -12,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: postgres
-  tag: "10.12"
+  version: "10.12"
   pullPolicy: IfNotPresent
 
 backup:
@@ -21,9 +14,6 @@ backup:
 
 # will invoke a DB restore when set
 restoreDB: false
-
-# declares what cluster this is running on
-isAWS: false
 
 dataMountPath: /var/lib/postgresql/data
 dataMountSubPath: /db_data
