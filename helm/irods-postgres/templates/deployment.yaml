@@ -30,10 +30,9 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ include "irods-postgres.fullname" . }}
-{{/*          command: ['/bin/sh', '-c', 'while true; do date; sleep 3600; done']*/}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.version }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           - name: POSTGRES_USER
@@ -43,14 +42,16 @@ spec:
           - name: PGDATA
             value: {{ .Values.dataMountPath }}{{ .Values.dataMountSubPath }}
           ports:
-            - name: postgres-port
-              containerPort: 5432
-              protocol: TCP
+            - name: {{ .Values.service.name }}
+              containerPort: {{ .Values.service.port }}
+              protocol: {{ .Values.service.protocol }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
           - name: {{ .Values.storage.name }}
             mountPath: {{ .Values.dataMountPath }}
+          - name: {{ .Values.volumes.name }}
+            mountPath: /data
           {{- if .Values.shmSize }}
           - name: dshm
             mountPath: /dev/shm
@@ -77,3 +78,6 @@ spec:
         - name: {{ .Values.storage.name }}
           persistentVolumeClaim:
             claimName: {{ include "irods-postgres.fullname" . }}-pvc
+        - name: {{ .Values.volumes.name }}
+          persistentVolumeClaim:
+            claimName:  {{ .Values.volumes.claimName }}

@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: loader-container
-        image: "{{ .Values.image.repository}}:{{ .Values.image.version }}"
+        image: "{{ .Values.image.repository}}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command:
         - /loaddb.sh
@@ -24,10 +24,10 @@ spec:
         - name: PGPASSWORD
           value: {{ .Values.adminPassword }}
         volumeMounts:
-        - mountPath: /data
-          name: {{ .Values.volumes.name }}
-        - mountPath:  loaddb.sh
-          name: "loader-script"
+        - name: {{ .Values.volumes.name }}
+          mountPath: /data
+        - name: "loader-script"
+          mountPath:  loaddb.sh
           subPath: "loaddb.sh"
 
       {{- with .Values.nodeSelector }}

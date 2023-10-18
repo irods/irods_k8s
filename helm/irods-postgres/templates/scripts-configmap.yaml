@@ -40,8 +40,9 @@ data:
     # 0 21 * * * postgres /storage/backups.sh
     BASE_DIR=/data
     DUMPS_DIR=$BASE_DIR/db-backups/{{- include "irods-postgres.fullname" . }}
+    LOG_PATH=$LOG_PATH/{{- include "irods-postgres.fullname" . }}
 
-    mkdir -p $DUMPS_DIR && mkdir -p $LOG_PATH/{{- include "irods-postgres.fullname" . }}
+    mkdir -p -m 777 $DUMPS_DIR && mkdir -p -m 777 $LOG_PATH
 
     if [ -e $LOG_PATH/export.log ]; then
         rm $LOG_PATH/export.log

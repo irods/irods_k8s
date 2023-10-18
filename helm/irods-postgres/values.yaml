@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: postgres
-  version: "10.12"
+  tag: "10.12"
   pullPolicy: IfNotPresent
 
 backup:
@@ -52,18 +52,20 @@ backupSecurityContext: {}
 securityContext: {}
 
 service:
+  name: service-port-name
   type: ClusterIP
+  protocol: TCP
   port: 1234
 
 shmSize: 1Gi
 
 resources:
   limits:
-    memory: 3Gi
-    cpu: 1000m
-  requests:
     memory: 1Gi
     cpu: 500m
+  requests:
+    memory: 500Mi
+    cpu: 100m
 
 nodeSelector: {}
 
