@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "irods-mysql.fullname" . }}
+  name: {{ include "irods-db.fullname" . }}
   labels:
-    {{- include "irods-mysql.labels" . | nindent 4 }}
+    {{- include "irods-db.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "irods-mysql.selectorLabels" . | nindent 6 }}
+      {{- include "irods-db.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,30 +18,26 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "irods-mysql.selectorLabels" . | nindent 8 }}
+        {{- include "irods-db.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "irods-mysql.serviceAccountName" . }}
+      serviceAccountName: {{ include "irods-db.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-{{/*          command: ['/bin/sh']*/}}
-{{/*          args: ['-c', 'while true; do date; sleep 3600; done']*/}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          - name: MYSQL_USER
-            value: {{ .Values.adminUser }}
-          - name: MYSQL_ROOT_PASSWORD
-            value: {{ .Values.adminPassword }}
-          - name: MYSQL_PASSWORD
-            value: {{ .Values.adminPassword }}
+          {{ range $key, $value := .Values.envParams }}
+          - name: {{ $value.envParamName }}
+            value: {{ $value.envParamValue }}
+          {{ end }}
           ports:
             - name: {{ .Values.service.name }}
               containerPort: {{ .Values.service.port }}
@@ -54,7 +50,7 @@ spec:
       volumes:
       - name: {{ .Values.storage.name }}
         persistentVolumeClaim:
-          claimName: {{ include "irods-mysql.fullname" . }}-pvc
+          claimName: {{ include "irods-db.fullname" . }}-pvc
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
