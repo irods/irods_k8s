@@ -6,10 +6,11 @@ replicaCount: 1
 
 image:
   repository: container-registry
-  os:
-  os_version:
   tag: latest
   pullPolicy: IfNotPresent
+  os:
+  os_version:
+
 
 imagePullSecrets: []
 nameOverride: ""
