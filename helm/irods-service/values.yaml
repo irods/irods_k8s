@@ -5,8 +5,9 @@
 replicaCount: 1
 
 image:
-image:
-  repository: containers.renci.org/irods/irods-service
+  repository: container-registry
+  os:
+  os_version:
   tag: latest
   pullPolicy: IfNotPresent
 
