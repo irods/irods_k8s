@@ -1,0 +1,22 @@
+{{ if .Values.initDB }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{- include "irods-db.fullname" . }}-scripts"
+data:
+  init-irods-pg-db.sh: |-
+    #!/bin/sh
+    set -e
+
+    # Check to see if the apsviz_gauge DB and user exist. if not create them
+    psql -v ON_ERROR_STOP=1 --username "{{ .Values.initDB.adminUser }}" <<-EOSQL
+        CREATE DATABASE "ICAT";
+        GRANT ALL PRIVILEGES ON DATABASE "ICAT" TO irods;
+    EOSQL
+
+  init-irods-mysql-db.sh: |-
+    #!/bin/sh
+    mysql -uroot -p{{ .Values.initDB.adminPassword }} -e "CREATE DATABASE ICAT; CREATE USER '{{ .Values.initDB.adminUser }}'@'localhost'; GRANT ALL ON ICAT.* to '{{ .Values.initDB.adminUser }}'@'localhost';"
+
+{{ end }}
