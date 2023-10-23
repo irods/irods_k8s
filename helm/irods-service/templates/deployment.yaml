@@ -26,6 +26,15 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+      initContainers:
+        - name: load-test-env
+          image: alpine/git
+          command: ['git', 'clone', '--single-branch', '--', 'https://github.com/irods/irods_testing_environment.git', '{{ .Values.storage.mountPath }}']
+          volumeMounts:
+          - name: {{ .Values.storage.name }}
+            mountPath: {{ .Values.storage.mountPath }}
+
       containers:
         - name: {{ include "irods-service.fullname" . }}
           securityContext:
