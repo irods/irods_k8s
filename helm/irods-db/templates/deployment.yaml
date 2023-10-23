@@ -34,10 +34,10 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          {{ range $key, $value := .Values.envParams }}
+          {{- range $key, $value := .Values.envParams }}
           - name: {{ $value.envParamName }}
             value: {{ $value.envParamValue }}
-          {{ end }}
+          {{- end }}
           ports:
             - name: {{ .Values.service.name }}
               containerPort: {{ .Values.service.port }}
@@ -47,10 +47,19 @@ spec:
           volumeMounts:
           - name: {{ .Values.storage.name }}
             mountPath: {{ .Values.storage.dataMountPath }}
+          {{- if .Values.initDB }}
+          - name: init-irods-db-script
+            mountPath: /docker-entrypoint-initdb.d/001-init-irods-db.sh
+            subPath: {{ .Values.initDB.initScript | quote }}
+          {{- end }}
       volumes:
       - name: {{ .Values.storage.name }}
         persistentVolumeClaim:
           claimName: {{ include "irods-db.fullname" . }}-pvc
+      - name: init-irods-db-script
+        configMap:
+          name: "{{- include "irods-db.fullname" . }}-scripts"
+          defaultMode: 0777
 
       {{- with .Values.nodeSelector }}
       nodeSelector:

@@ -15,9 +15,6 @@ fullnameOverride: ""
 
 serviceAccount: {}
 
-adminPassword: ""
-adminUser: ""
-
 podAnnotations: {}
 
 podSecurityContext: {}
@@ -37,6 +34,8 @@ storage:
   size: 5Mi
   accessMode: "ReadWriteOnce"
   dataMountPath: /somedir
+
+initDB:
 
 service:
   name: service-port-name
