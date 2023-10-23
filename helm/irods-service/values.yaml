@@ -34,10 +34,6 @@ securityContext:
   runAsUser: 1000
   runAsNonRoot: true
 
-service:
-  type: ClusterIP
-  port: 80
-
 ingress:
   enabled: false
   className: ""

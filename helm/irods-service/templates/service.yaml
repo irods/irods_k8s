@@ -1,3 +1,4 @@
+{{- if .Values.service }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,9 +8,20 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - name: primary-port
+      port: {{ .Values.service.primaryPort }}
+      targetPort: {{ .Values.service.primaryPort }}
       protocol: TCP
-      name: http
+    - name: secondary-port
+      port: {{ .Values.service.secondaryPort }}
+      targetPort: {{ .Values.service.secondaryPort }}
+      protocol: TCP
+    {{- range untilStep (int .Values.service.minPort) (int .Values.service.maxPort) 1 }}
+    - name: svc-port-{{ . }}
+      port: {{ . }}
+      targetPort: {{ . }}
+      protocol: TCP
+    {{- end }}
   selector:
     {{- include "irods-service.selectorLabels" . | nindent 4 }}
+{{- end }}

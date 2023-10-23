@@ -32,10 +32,20 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository}}{{ .Values.image.os }}-{{ .Values.image.os_version }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.service }}
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
+            - name: primary-port
+              containerPort: {{ .Values.service.primaryPort }}
               protocol: TCP
+            - name: secondary-port
+              containerPort: {{ .Values.service.secondaryPort }}
+              protocol: TCP
+            {{- range untilStep (int .Values.service.minPort) (int .Values.service.maxPort) 1 }}
+            - name: svc-port-{{ . }}
+              containerPort: {{ . }}
+              protocol: TCP
+            {{- end }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
