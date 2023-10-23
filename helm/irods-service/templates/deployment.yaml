@@ -24,21 +24,26 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.podSecurityContext }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-
+      {{- end }}
       initContainers:
         - name: load-test-env
           image: alpine/git
-          command: ['git', 'clone', '--single-branch', '--', 'https://github.com/irods/irods_testing_environment.git', '{{ .Values.storage.mountPath }}']
+          command: ["/bin/sh", "-c"]
+          args:
+            - git clone --single-branch -- https://github.com/irods/irods_testing_environment.git {{ .Values.storage.mountPath }}/tests;
+              git clone --single-branch -- https://github.com/irods/irods.git {{ .Values.storage.mountPath }}/runtime;
           volumeMounts:
           - name: {{ .Values.storage.name }}
             mountPath: {{ .Values.storage.mountPath }}
-
       containers:
         - name: {{ include "irods-service.fullname" . }}
+          {{- if .Values.securityContext}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.image.repository}}{{ .Values.image.os }}-{{ .Values.image.os_version }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.service }}
@@ -76,3 +81,7 @@ spec:
         - name: {{ .Values.storage.name }}
           persistentVolumeClaim:
             claimName: {{ include "irods-service.fullname" . }}-pvc
+        - name: init-irods-script
+          configMap:
+            name: "{{- include "irods-service.fullname" . }}-scripts"
+            defaultMode: 0777
