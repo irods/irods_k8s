@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: 2022 Renaissance Computing Institute. All rights reserved.
+# SPDX-FileCopyrightText: 2023 Renaissance Computing Institute. All rights reserved.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: LicenseRef-RENCI
+# SPDX-License-Identifier: MIT
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "irods-rabbitmq.fullname" . }}-mgt
+  labels:
+    {{- include "irods-rabbitmq.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.http }}
+      targetPort: {{ .Values.service.target_port }}
+      protocol: TCP
+      name: http
+    - port: {{ .Values.service.https }}
+      targetPort: {{ .Values.service.target_port }}
+      protocol: TCP
+      name: https
+  selector:
+    {{- include "irods-rabbitmq.selectorLabels" . | nindent 4 }}
+
+{{ if .Values.networking.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "irods-rabbitmq.fullname" . }}-queue
+  labels:
+  {{- include "irods-rabbitmq.labels" . | nindent 4 }}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.networking.host }}
+spec:
+  type: {{ .Values.networking.type }}
+  ports:
+  - name: {{ .Values.networking.name }}
+    port: {{ .Values.networking.port }}
+    protocol: TCP
+  selector:
+    {{- include "irods-rabbitmq.selectorLabels" . | nindent 4 }}
+
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: loadbalancer-port-for-rabbitmq
+spec:
+  podSelector:
+    matchLabels:
+      type: queue
+  ingress:
+  - from: []
+    ports:
+      - port: {{ .Values.networking.port }}
+{{ end }}

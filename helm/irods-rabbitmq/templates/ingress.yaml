@@ -1,0 +1,39 @@
+---
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "irods-rabbitmq.fullname" . -}}
+{{- $svcPort := .Values.service.http -}}
+{{- if and .Values.ingress.class (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.class }}
+  {{- end }}
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "irods-rabbitmq.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.class }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+  - hosts:
+      - {{ .Values.ingress.host }}
+    secretName: {{ .Values.ingress.host }}-tls
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: "/"
+            pathType: "{{ .Values.ingress.pathType }}"
+            backend:
+              service:
+                name: {{ $fullName }}-mgt
+                port:
+                  number: {{ $svcPort }}
+{{- end }}

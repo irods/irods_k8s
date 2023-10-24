@@ -1,0 +1,15 @@
+{{ if .Values.storage.create }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.storage.claimName }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+  - {{ .Values.storage.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.size }}
+{{ end }}
