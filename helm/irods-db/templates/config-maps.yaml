@@ -5,18 +5,41 @@ kind: ConfigMap
 metadata:
   name: "{{- include "irods-db.fullname" . }}-scripts"
 data:
+  {{- if .Values.initDB.postgres }}
   init-irods-pg-db.sh: |-
     #!/bin/sh
     set -e
 
+    # helpful cli to determine startup was successful
+    # postgres-# \l
+    # postgres-# \du
     # Check to see if the apsviz_gauge DB and user exist. if not create them
-    psql -v ON_ERROR_STOP=1 --username "{{ .Values.initDB.adminUser }}" <<-EOSQL
+    psql -v ON_ERROR_STOP=1 --username "{{ .Values.envParams.param1.envParamValue }}" <<-EOSQL
         CREATE DATABASE "ICAT";
+        CREATE ROLE "{{ .Values.initDB.user }}" WITH LOGIN SUPERUSER CREATEDB CREATEROLE INHERIT NOREPLICATION CONNECTION LIMIT -1 PASSWORD '{{ .Values.initDB.password }}';
         GRANT ALL PRIVILEGES ON DATABASE "ICAT" TO irods;
     EOSQL
+  {{- end }}
 
+  {{- if .Values.initDB.superv}}
+  init-superv-pg-db.sh: |-
+    #!/bin/sh
+    set -e
+
+    # Check to see if the apsviz_gauge DB and user exist. if not create them
+    psql -v ON_ERROR_STOP=1 --username "{{ .Values.envParams.param1.envParamValue }}" <<-EOSQL
+          CREATE DATABASE "irods_superv" WITH OWNER = postgres TABLESPACE = pg_default CONNECTION LIMIT = -1 IS_TEMPLATE = False;
+          CREATE ROLE "{{ .Values.initDB.user }}" WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT NOREPLICATION CONNECTION LIMIT -1 PASSWORD '{{ .Values.initDB.password }}';
+          GRANT ALL PRIVILEGES ON DATABASE "irods_superv" TO "superv";
+    EOSQL
+  {{- end }}
+
+  {{- if .Values.initDB.mysql}}
   init-irods-mysql-db.sh: |-
     #!/bin/sh
-    mysql -uroot -p{{ .Values.initDB.adminPassword }} -e "CREATE DATABASE ICAT; CREATE USER '{{ .Values.initDB.adminUser }}'@'localhost'; GRANT ALL ON ICAT.* to '{{ .Values.initDB.adminUser }}'@'localhost';"
-
+    # helpful cli to determine startup was successful
+    # mysql> SELECT user FROM mysql.user;
+    # mysql> show databases;
+    mysql -uroot -p{{ .Values.envParams.param2.envParamValue }} -e "CREATE DATABASE ICAT; CREATE USER '{{ .Values.initDB.user }}'@'localhost'; GRANT ALL ON ICAT.* to '{{ .Values.initDB.user }}'@'localhost';"
+  {{ end }}
 {{ end }}
