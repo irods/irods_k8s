@@ -48,7 +48,7 @@ spec:
           - name: {{ .Values.storage.name }}
             mountPath: {{ .Values.storage.dataMountPath }}
           {{- if .Values.initDB }}
-          - name: init-irods-db-script
+          - name: init-db-script
             mountPath: /docker-entrypoint-initdb.d/001-init-irods-db.sh
             subPath: {{ .Values.initDB.initScript | quote }}
           {{- end }}
@@ -56,7 +56,7 @@ spec:
       - name: {{ .Values.storage.name }}
         persistentVolumeClaim:
           claimName: {{ include "irods-db.fullname" . }}-pvc
-      - name: init-irods-db-script
+      - name: init-db-script
         configMap:
           name: "{{- include "irods-db.fullname" . }}-scripts"
           defaultMode: 0777
