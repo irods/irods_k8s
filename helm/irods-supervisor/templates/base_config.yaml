@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2022 Renaissance Computing Institute. All rights reserved.
+# SPDX-FileCopyrightText: 2023 Renaissance Computing Institute. All rights reserved.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: LicenseRef-RENCI
+# SPDX-License-Identifier: MIT
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{- include "irods-supervisor.fullname" . }}-scripts"
+data:
+  base_config.json: |-
+    {
+      "CLUSTER": {{ .Values.base_config.cluster | quote }},
+      "NAMESPACE": {{ .Values.base_config.namespace | quote }},
+      "DATA_PVC_CLAIM": {{ .Values.base_config.data_pvc_claim | quote }},
+      "SECRETS_CLAIM": {{ .Values.base_config.secrets_claim | quote }},
+      "CREATE_SLEEP": {{ .Values.base_config.create_sleep }},
+      "JOB_TIMEOUT": {{ .Values.base_config.job_timeout }},
+      "JOB_LIMIT_MULTIPLIER": {{ .Values.base_config.job_limit_multiplier | quote  }},
+      "JOB_BACKOFF_LIMIT": {{ .Values.base_config.job_backoff_limit }},
+      "SV_INACTIVITY": {{ .Values.base_config.sv_inactivity }},
+      "POLL_SHORT_SLEEP": {{ .Values.base_config.poll_short_sleep }},
+      "POLL_LONG_SLEEP": {{ .Values.base_config.poll_long_sleep }},
+      "MAX_NO_ACTIVITY_COUNT": {{ .Values.base_config.max_no_activity_count }},
+      "CPU_LIMITS": {{ .Values.cpu_limits }}
+    }

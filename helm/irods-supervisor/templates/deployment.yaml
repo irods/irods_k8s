@@ -1,0 +1,104 @@
+# SPDX-FileCopyrightText: 2022 Renaissance Computing Institute. All rights reserved.
+# SPDX-FileCopyrightText: 2023 Renaissance Computing Institute. All rights reserved.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: LicenseRef-RENCI
+# SPDX-License-Identifier: MIT
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "irods-supervisor.fullname" . }}
+  labels:
+    {{- include "irods-supervisor.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "irods-supervisor.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "irods-supervisor.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "irods-supervisor.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - name:  {{ .Values.volumes.name }}
+            mountPath: "/data"
+          - mountPath: /repo/irods-Supervisor/src/common/base_config.json
+            name: "base-config-script"
+            subPath: "base_config.json"
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+          - name: LOG_PATH
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: log-path
+          - name: LOG_LEVEL
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: log-level
+          - name: SUPERV_DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: superv-db-host
+          - name: SUPERV_DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: superv-port
+          - name: SUPERV_DB_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: superv-database
+          - name: SUPERV_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: superv-username
+          - name: SUPERV_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: superv-password
+          - name: SYSTEM
+            value: {{ .Values.system  | quote }}
+      volumes:
+        - name: {{ .Values.volumes.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.claimName }}
+        - name: base-config-script
+          configMap:
+            name: "{{- include "irods-supervisor.fullname" . }}-scripts"
+            defaultMode: 0777
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

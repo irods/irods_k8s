@@ -1,0 +1,94 @@
+# SPDX-FileCopyrightText: 2022 Renaissance Computing Institute. All rights reserved.
+# SPDX-FileCopyrightText: 2023 Renaissance Computing Institute. All rights reserved.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: LicenseRef-RENCI
+# SPDX-License-Identifier: MIT
+
+# Default values for irods-supervisor.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: containers.renci.org/irods/irods-supervisor
+  tag: "latest"
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+cpu_limits: true
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+volumes:
+  create: false
+  name: pvc-name
+  claimName: pvc-claim-name
+  storageClass: "someclass"
+  size: 1Gi
+
+podSecurityContext: {}
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - path: /
+          pathType: ""
+  tls: []
+
+base_config:
+  cluster: "clustername"
+  namespace: "namespace"
+  data_pvc_claim: "data_pvc_claim"
+  filesvr_pvc_claim: "filesvr_pvc_claim"
+  secrets_claim: "secrets-claim"
+  create_sleep: "2"
+  job_timeout: "7200"
+  job_limit_multiplier: ".1"
+  job_backoff_limit: "1"
+  sv_inactivity: "8"
+  poll_short_sleep: "10"
+  poll_long_sleep: "60"
+  max_no_activity_count: "60"
+
+resources:
+  limits:
+    ephemeral-storage: 64Mi
+    memory: 1Gi
+  requests:
+    cpu: 150m
+    ephemeral-storage: 50Mi
+    memory: 100Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
