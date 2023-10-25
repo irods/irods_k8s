@@ -1,0 +1,147 @@
+# SPDX-FileCopyrightText: 2022 Renaissance Computing Institute. All rights reserved.
+# SPDX-FileCopyrightText: 2023 Renaissance Computing Institute. All rights reserved.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: LicenseRef-RENCI
+# SPDX-License-Identifier: MIT
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "irods-settings.fullname" . }}
+  labels:
+    {{- include "irods-settings.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "irods-settings.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "irods-settings.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: IRODS_DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: irods-db-host
+          - name: IRODS_DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: irods-port
+          - name: IRODS_DB_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: irods-database
+          - name: IRODS_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: irods-username
+          - name: IRODS_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: irods-password
+
+          - name: LOG_PATH
+            valueFrom:
+              secretKeyRef:
+                name: irods-keys
+                key: log-path
+          - name: LOG_LEVEL
+            valueFrom:
+              secretKeyRef:
+                name: irodskeys
+                key: log-level
+          - name: LOG_BACKUP_PATH
+            value: {{ .Values.log_backup_path }}
+
+          - name: SYSTEM
+            value: {{ .Values.system }}
+          - name: TEMP_FILE_PATH
+            value: {{ .Values.volumes.temp_dir }}
+
+          - name: BEARER_NAME
+            value: {{ .Values.jwtSecurity.bearerName }}
+          - name: BEARER_SECRET
+            value: {{ .Values.jwtSecurity.bearerSecret }}
+
+          - name: JWT_ALGORITHM
+            value: {{ .Values.jwtSecurity.jwtAlgorithm }}
+          - name: JWT_SECRET
+            value: {{ .Values.jwtSecurity.jwtSecret }}
+
+          - name: PRD_SETTINGS_URL
+            value: {{ .Values.urls.prd }}
+          - name: DEV_SETTINGS_URL
+            value: {{ .Values.urls.dev }}
+
+          - name: PRD_BEARER_TOKEN
+            value: {{ .Values.bearerTokens.prd }}
+          - name: DEV_BEARER_TOKEN
+            value: {{ .Values.bearerTokens.dev }}
+
+          volumeMounts:
+            - name:  {{ .Values.volumes.name }}
+              mountPath: {{ .Values.volumes.mountPath }}
+          command:
+            - 'uvicorn'
+          args:
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "{{ .Values.service.target_port }}"
+            - "--workers"
+            - "4"
+            - "src.server:APP"
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.target_port }}
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /docs
+              port: {{ .Values.service.target_port }}
+            failureThreshold: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: {{ .Values.service.target_port }}
+            initialDelaySeconds: 1
+            periodSeconds: 30
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      volumes:
+        - name: {{ .Values.volumes.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.claimName }}
+    {{- with .Values.nodeSelector}}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
