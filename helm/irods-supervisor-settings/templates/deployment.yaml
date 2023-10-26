@@ -30,31 +30,31 @@ spec:
           image: "{{ .Values.image.repository }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          - name: IRODS_DB_HOST
+          - name: IRODS_K8S_DB_HOST
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: irods-db-host
-          - name: IRODS_DB_PORT
+                key: irods-k8s-db-host
+          - name: IRODS_K8S_DB_PORT
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: irods-port
-          - name: IRODS_DB_DATABASE
+                key: irods-k8s-port
+          - name: IRODS_K8S_DB_DATABASE
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: irods-database
-          - name: IRODS_DB_USERNAME
+                key: irods-k8s-database
+          - name: IRODS_K8S_DB_USERNAME
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: irods-username
-          - name: IRODS_DB_PASSWORD
+                key: irods-k8s-username
+          - name: IRODS_K8S_DB_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: irods-password
+                key: irods-k8s-password
 
           - name: LOG_PATH
             valueFrom:
@@ -64,10 +64,8 @@ spec:
           - name: LOG_LEVEL
             valueFrom:
               secretKeyRef:
-                name: irodskeys
+                name: irods-keys
                 key: log-level
-          - name: LOG_BACKUP_PATH
-            value: {{ .Values.log_backup_path }}
 
           - name: SYSTEM
             value: {{ .Values.system }}
@@ -83,16 +81,6 @@ spec:
             value: {{ .Values.jwtSecurity.jwtAlgorithm }}
           - name: JWT_SECRET
             value: {{ .Values.jwtSecurity.jwtSecret }}
-
-          - name: PRD_SETTINGS_URL
-            value: {{ .Values.urls.prd }}
-          - name: DEV_SETTINGS_URL
-            value: {{ .Values.urls.dev }}
-
-          - name: PRD_BEARER_TOKEN
-            value: {{ .Values.bearerTokens.prd }}
-          - name: DEV_BEARER_TOKEN
-            value: {{ .Values.bearerTokens.dev }}
 
           volumeMounts:
             - name:  {{ .Values.volumes.name }}
