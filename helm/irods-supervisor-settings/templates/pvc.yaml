@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-License-Identifier: LicenseRef-RENCI
 # SPDX-License-Identifier: MIT
-
+{{ if .Values.volumes.create }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: irods-test-pvc
+  name: irods-pvc
   annotations:
     helm.sh/resource-policy: keep
 spec:
@@ -18,4 +18,4 @@ spec:
   resources:
     requests:
       storage: {{ .Values.volumes.size }}
-
+{{ end }}
