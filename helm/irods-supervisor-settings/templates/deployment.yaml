@@ -30,31 +30,31 @@ spec:
           image: "{{ .Values.image.repository }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          - name: IRODS_K8S_DB_HOST
+          - name: IRODS_SV_DB_HOST
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: irods-k8s-db-host
-          - name: IRODS_K8S_DB_PORT
+                key: irods-sv-host
+          - name: IRODS_SV_DB_PORT
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: irods-k8s-port
-          - name: IRODS_K8S_DB_DATABASE
+                key: irods-sv-port
+          - name: IRODS_SV_DB_DATABASE
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: irods-k8s-database
-          - name: IRODS_K8S_DB_USERNAME
+                key: irods-sv-database
+          - name: IRODS_SV_DB_USERNAME
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: irods-k8s-username
-          - name: IRODS_K8S_DB_PASSWORD
+                key: irods-sv-username
+          - name: IRODS_SV_DB_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: irods-k8s-password
+                key: irods-sv-password
 
           - name: LOG_PATH
             valueFrom:
