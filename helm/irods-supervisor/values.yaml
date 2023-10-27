@@ -80,8 +80,9 @@ base_config:
 
 resources:
   limits:
+    cpu: 250m
     ephemeral-storage: 64Mi
-    memory: 1Gi
+    memory: 500mi
   requests:
     cpu: 150m
     ephemeral-storage: 50Mi
