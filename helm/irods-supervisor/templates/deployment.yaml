@@ -54,31 +54,31 @@ spec:
               secretKeyRef:
                 name: irods-keys
                 key: log-level
-          - name: SUPERV_DB_HOST
+          - name: IRODS_SV_DB_HOST
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: superv-db-host
-          - name: SUPERV_DB_PORT
+                key: irods-sv-host
+          - name: IRODS_SV_DB_PORT
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: superv-port
-          - name: SUPERV_DB_DATABASE
+                key: irods-sv-port
+          - name: IRODS_SV_DB_DATABASE
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: superv-database
-          - name: SUPERV_DB_USERNAME
+                key: irods-sv-database
+          - name: IRODS_SV_DB_USERNAME
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: superv-username
-          - name: SUPERV_DB_PASSWORD
+                key: irods-sv-username
+          - name: IRODS_SV_DB_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: irods-keys
-                key: superv-password
+                key: irods-sv-password
           - name: SYSTEM
             value: {{ .Values.system  | quote }}
       volumes:
