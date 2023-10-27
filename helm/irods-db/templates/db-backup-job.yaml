@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: 2022 Renaissance Computing Institute. All rights reserved.
+# SPDX-FileCopyrightText: 2023 Renaissance Computing Institute. All rights reserved.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: LicenseRef-RENCI
+# SPDX-License-Identifier: MIT
+
+{{ if .Values.backup.enable }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "irods-db.fullname" . }}-backup-job
+  labels:
+    {{- include "irods-db.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.backup.crontab }}"
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3
+      template:
+        spec:
+          containers:
+          - name: {{ .Chart.Name }}-backup-job
+            image: "{{ .Values.backupImage.repository }}:{{ .Values.backupImage.tag }}"
+            imagePullPolicy: {{ .Values.backupImage.pullPolicy }}
+            volumeMounts:
+            - name:  {{ .Values.dataVolumes.name }}
+              mountPath: "/data"
+            - mountPath: dumpDatabase.sh
+              name: "backup-script"
+              subPath: "dumpDatabase.sh"
+            command: ['bash', './dumpDatabase.sh']
+            env:
+            - name: LOG_PATH
+              valueFrom:
+                secretKeyRef:
+                  name: irods-keys
+                  key: log-path
+            - name: IRODS_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: irods-keys
+                  key: irods-sv-host
+            - name: IRODS_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: irods-keys
+                  key: irods-sv-port
+            - name: PGUSER
+              value: {{ .Values.envParams.param1.envParamValue }}
+            - name: PGPASSWORD
+              value: {{ .Values.envParams.param2.envParamValue }}
+          restartPolicy: Never
+          volumes:
+            - name: {{ .Values.dataVolumes.name }}
+              persistentVolumeClaim:
+                claimName: {{ .Values.dataVolumes.claimName }}
+            - name: backup-script
+              configMap:
+                name: "{{- include "irods-db.fullname" . }}-scripts"
+                defaultMode: 0777
+          securityContext:
+            {{- toYaml .Values.backupSecurityContext | nindent 12 }}
+  {{ end }}

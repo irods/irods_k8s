@@ -60,7 +60,6 @@ spec:
         configMap:
           name: "{{- include "irods-db.fullname" . }}-scripts"
           defaultMode: 0777
-
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

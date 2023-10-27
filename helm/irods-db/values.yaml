@@ -5,47 +5,33 @@
 replicaCount: 1
 
 image:
-  repository: mysql
+  repository: some-repo
   pullPolicy: IfNotPresent
-  tag: "8.0.29"
+  tag: "0.0.0"
 
 imagePullSecrets: []
 nameOverride: "test"
 fullnameOverride: ""
-
 serviceAccount: {}
-
 podAnnotations: {}
-
 podSecurityContext: {}
-  # fsGroup: 2000
-
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+nodeSelector: {}
+tolerations: []
+affinity: {}
 
 storage:
   name: db-vol
   create: false
-  size: 5Mi
+  size: 1Mi
   accessMode: "ReadWriteOnce"
   dataMountPath: /somedir
-
-initDB:
 
 service:
   name: service-port-name
   type: ClusterIP
   protocol: TCP
   port: 1234
-
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
 
 resources:
    limits:
@@ -62,8 +48,14 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-nodeSelector: {}
+initDB:
+  mysql: false
+  postgres: false
+  user: "someuser"
+  password: "tsomepassword"
+  initScript: "init.sh"
 
-tolerations: []
-
-affinity: {}
+backup:
+  enable: false
+  restoreDB: false
+  crontab: "0 5 * * *"
