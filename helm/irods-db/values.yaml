@@ -12,13 +12,16 @@ image:
 imagePullSecrets: []
 nameOverride: "test"
 fullnameOverride: ""
-serviceAccount: {}
 podAnnotations: {}
 podSecurityContext: {}
 securityContext: {}
 nodeSelector: {}
 tolerations: []
 affinity: {}
+serviceAccount:
+  create: false
+  annotations: {}
+  name:
 
 storage:
   name: db-vol
