@@ -34,8 +34,8 @@ spec:
           image: alpine/git
           command: ["/bin/sh", "-c"]
           args:
-            - git clone --single-branch -- https://github.com/irods/irods_testing_environment.git {{ .Values.storage.mountPath }}/tests;
-              git clone --single-branch -- https://github.com/irods/irods.git {{ .Values.storage.mountPath }}/runtime;
+            - git clone --single-branch -- https://github.com/irods/irods_testing_environment.git {{ .Values.storage.testing.mountPath }}/tests;
+              git clone --single-branch -- https://github.com/irods/irods.git {{ .Values.storage.testing.mountPath }}/runtime;
           volumeMounts:
           - name: {{ .Values.storage.testing.name }}
             mountPath: {{ .Values.storage.testing.mountPath }}
