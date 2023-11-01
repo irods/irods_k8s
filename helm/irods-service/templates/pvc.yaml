@@ -1,11 +1,41 @@
+{{ if .Values.storage.testing }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "irods-service.fullname" . }}-pvc
+  name: {{ include "irods-service.fullname" . }}-testing-pvc
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   accessModes:
-  - {{ .Values.storage.accessMode }}
+  - {{ .Values.storage.testing.accessMode }}
   resources:
     requests:
-      storage: {{ .Values.storage.size }}
+      storage: {{ .Values.storage.testing.size }}
+{{ end }}
+{{ if .Values.storage.vault }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "irods-service.fullname" . }}-vault-pvc
+spec:
+  accessModes:
+  - {{ .Values.storage.vault.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.vault.size }}
+{{ end }}
+{{ if .Values.storage.zone }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "irods-service.fullname" . }}-zone-pvc
+spec:
+  accessModes:
+  - {{ .Values.storage.zone.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.zone.size }}
+{{ end }}
