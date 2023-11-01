@@ -38,11 +38,11 @@ service:
 
 resources:
    limits:
-     cpu: 500m
-     memory: 1Gi
+     cpu: 1000m
+     memory: 512Mi
    requests:
-     cpu: 100m
-     memory: 1Gi
+     cpu: 250m
+     memory: 128Mi
 
 autoscaling:
   enabled: false
