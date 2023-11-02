@@ -5,6 +5,29 @@ kind: ConfigMap
 metadata:
   name: "{{- include "irods-service.fullname" . }}-scripts"
 data:
+  00-irods.conf: |-
+    $FileCreateMode 0644
+    $DirCreateMode 0755
+    $Umask 0000
+    $template irods_format,"%msg%\n"
+    :programname,startswith,"irodsServer" /var/log/irods/irods.log;irods_format
+    & stop
+    :programname,startswith,"irodsDelayServer" /var/log/irods/irods.log;irods_format
+    & stop
+
+  irods: |-
+    /var/log/irods/irods.log {
+        weekly
+        rotate 26
+        copytruncate
+        delaycompress
+        compress
+        dateext
+        notifempty
+        missingok
+        su root root
+    }
+
   irodsInstall.sh: |-
     apt-get update;
     apt-get -y upgrade;
@@ -12,7 +35,7 @@ data:
     apt-get autoclean;
     sed 's/HOSTNAME_TEMPLATE/'"${HOSTNAME}"'/g' {{ .Values.serverInit.serviceInitMountPath }} > /tmp/serviceInit.json;
     python3 /var/lib/irods/scripts/setup_irods.py --json_configuration_file /tmp/serviceInit.json;
-    su - irods -c '/usr/sbin/irodsServer';
+    su - irods -c './irodsctl start -v';
 
   serviceInit.json: |-
     {
@@ -52,6 +75,7 @@ data:
       },
       "server_config": {
         "advanced_settings": {
+          "migrate_delay_server_sleep_time_in_seconds": 604800,
           "default_log_rotation_in_days": 5,
           "default_number_of_transfer_threads": 4,
           "default_temporary_password_lifetime_in_seconds": 120,
@@ -89,18 +113,18 @@ data:
         "host_access_control": {"access_entries": []},
         "host_resolution": {"host_entries": []},
         "log_level": {
-          "agent": "info",
-          "agent_factory": "info",
+          "agent": "trace",
+          "agent_factory": "trace",
           "api": "info",
           "authentication": "info",
           "database": "info",
-          "delay_server": "info",
-          "legacy": "info",
+          "delay_server": "trace",
+          "legacy": "trace",
           "microservice": "info",
           "network": "info",
           "resource": "info",
           "rule_engine": "info",
-          "server": "info",
+          "server": "trace",
           "sql": "info"
         },
         "match_hash_policy": "compatible",
@@ -161,4 +185,6 @@ data:
         "zone_user": "{{ .Values.serverInit.adminName }}"
       }
     }
+
+
 {{ end }}
