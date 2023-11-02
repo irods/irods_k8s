@@ -42,7 +42,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ include "irods-service.fullname" . }}
-          command: [ '/bin/sh' , '-c']
+          command: [ '/bin/bash' , '-c']
           {{- if .Values.serverInit.isProvider }}
           args: [ '{{ .Values.serverInit.initScriptMountPath }} && until false; do sleep 2147483647d; done;' ]
           {{- else }}
@@ -79,6 +79,12 @@ spec:
           - name: init-service-script
             mountPath: {{ .Values.serverInit.serviceInitMountPath }}
             subPath: {{ .Values.serverInit.serviceInitName | quote }}
+          - name: init-logging-script
+            mountPath: /etc/rsyslog.d/00-irods.conf
+            subPath: "00-irods.conf"
+          - name: init-logcfg-script
+            mountPath: /etc/logrotate.d/irods
+            subPath: "irods"
           {{- end }}
           {{- if .Values.storage.testing }}
           - name: {{ .Values.storage.testing.name }}
@@ -111,6 +117,14 @@ spec:
             name: "{{- include "irods-service.fullname" . }}-scripts"
             defaultMode: 0777
         - name: init-service-script
+          configMap:
+            name: "{{- include "irods-service.fullname" . }}-scripts"
+            defaultMode: 0777
+        - name: init-logging-script
+          configMap:
+            name: "{{- include "irods-service.fullname" . }}-scripts"
+            defaultMode: 0777
+        - name: init-logcfg-script
           configMap:
             name: "{{- include "irods-service.fullname" . }}-scripts"
             defaultMode: 0777
