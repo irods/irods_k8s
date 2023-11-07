@@ -38,7 +38,7 @@ spec:
           volumeMounts:
           - name:  {{ .Values.volumes.name }}
             mountPath: "/data"
-          - mountPath: /repo/irods-Supervisor/src/common/base_config.json
+          - mountPath: /repo/iRODS-K8s-Supervisor/src/common/base_config.json
             name: "base-config-script"
             subPath: "base_config.json"
           resources:
