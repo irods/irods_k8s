@@ -27,3 +27,17 @@ data:
       "MAX_NO_ACTIVITY_COUNT": {{ .Values.base_config.max_no_activity_count }},
       "CPU_LIMITS": {{ .Values.cpu_limits }}
     }
+
+  init-irods-pg-db.sh: |-
+    #!/bin/sh
+    set -e
+
+    # helpful cli to determine startup was successful
+    # postgres-# \l
+    # postgres-# \du
+    # Check to see if the apsviz_gauge DB and user exist. if not create them
+    psql -v ON_ERROR_STOP=1 --username "{{ .Values.initDB.pg_user }}" <<-EOSQL
+      CREATE DATABASE "ICAT";
+      CREATE ROLE "{{ .Values.initDB.user }}" WITH LOGIN SUPERUSER CREATEDB CREATEROLE INHERIT NOREPLICATION CONNECTION LIMIT -1 PASSWORD '{{ .Values.initDB.password }}';
+      GRANT ALL PRIVILEGES ON DATABASE "ICAT" TO irods;
+    EOSQL
