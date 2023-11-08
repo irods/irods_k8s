@@ -11,18 +11,18 @@ spec:
     requests:
       storage: {{ .Values.storage.testing.size }}
 {{ end }}
-{{ if .Values.storage.vault }}
+{{ if .Values.storage.var }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "irods-service.fullname" . }}-vault-pvc
+  name: {{ include "irods-service.fullname" . }}-var-pvc
 spec:
   accessModes:
-  - {{ .Values.storage.vault.accessMode }}
+  - {{ .Values.storage.var.accessMode }}
   resources:
     requests:
-      storage: {{ .Values.storage.vault.size }}
+      storage: {{ .Values.storage.var.size }}
 {{ end }}
 {{ if .Values.storage.zone }}
 ---

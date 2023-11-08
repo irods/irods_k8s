@@ -90,9 +90,9 @@ spec:
           - name: {{ .Values.storage.testing.name }}
             mountPath: {{ .Values.storage.testing.mountPath }}
           {{- end }}
-          {{- if .Values.storage.vault }}
-          - name: {{ .Values.storage.vault.name }}
-            mountPath: {{ .Values.storage.vault.mountPath }}
+          {{- if .Values.storage.var }}
+          - name: {{ .Values.storage.var.name }}
+            mountPath: {{ .Values.storage.var.mountPath }}
           {{- end }}
           {{- if .Values.storage.zone }}
           - name: {{ .Values.storage.zone.name }}
@@ -134,10 +134,10 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "irods-service.fullname" . }}-testing-pvc
       {{- end }}
-      {{- if .Values.storage.vault }}
-        - name: {{ .Values.storage.vault.name }}
+      {{- if .Values.storage.var }}
+        - name: {{ .Values.storage.var.name }}
           persistentVolumeClaim:
-            claimName: {{ include "irods-service.fullname" . }}-vault-pvc
+            claimName: {{ include "irods-service.fullname" . }}-var-pvc
       {{- end }}
       {{- if .Values.storage.zone }}
         - name: {{ .Values.storage.zone.name }}

@@ -40,7 +40,7 @@ data:
   serviceInit.json: |-
     {
       "admin_password": "{{ .Values.serverInit.adminPassword }}",
-      "default_resource_directory": "{{ .Values.storage.vault.mountPath }}",
+      "default_resource_directory": "{{ .Values.storage.var.mountPath }}/vault",
       "default_resource_name": "demoResc",
       "host_system_information": {
         "service_account_user_name": "{{ .Values.serverInit.serviceAccountName }}",
