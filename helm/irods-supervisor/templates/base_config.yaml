@@ -77,7 +77,8 @@ data:
     apt-get -y upgrade;
     apt-get -y install irods-server irods-database-plugin-postgres;
     apt-get autoclean;
-    sed 's/HOSTNAME_TEMPLATE/'"${HOSTNAME}"'/g' /irods/serviceInit.json > /tmp/serviceInit.json;
+    sed 's/HOSTNAME_TEMPLATE/'"${HOSTNAME}"'/g' /irods/serviceInit.json > /tmp/serviceInit.json.1;
+    sed 's/DBNAME_TEMPLATE/'"${DB_SERVICE_NAME}"'/g' /tmp/serviceInit.json.1 > /tmp/serviceInit.json;
     python3 /var/lib/irods/scripts/setup_irods.py --json_configuration_file /tmp/serviceInit.json;
     su - irods -c './irodsctl start -v';
     until false; do sleep 10000; done;
@@ -178,7 +179,7 @@ data:
           "authentication": {},
           "database": {
             "postgres": {
-              "db_host": "provider-3",
+              "db_host": "DBNAME_TEMPLATE",
               "db_name": "ICAT",
               "db_odbc_driver": "PostgreSQL ANSI",
               "db_password": "testpassword",
