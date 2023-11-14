@@ -87,7 +87,7 @@ spec:
             claimName: {{ .Values.volumes.claimName }}
         - name: base-config-script
           configMap:
-            name: "{{- include "irods-supervisor.fullname" . }}-scripts"
+            name: "supervisor-scripts"
             defaultMode: 0777
 
       {{- with .Values.nodeSelector }}
