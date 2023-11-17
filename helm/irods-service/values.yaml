@@ -13,8 +13,9 @@ image:
 
 initContainer: false
 
-serverInit:
+serviceInit:
   isProvider: false
+  isConsumer: false
 
 imagePullSecrets: []
 nameOverride: ""
@@ -43,7 +44,7 @@ ingress:
 
 resources:
   limits:
-    ephemeral-storage: 512Mi
+    ephemeral-storage: 256Mi
     cpu: 2000m
     memory: 5Gi
   requests:
