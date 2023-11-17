@@ -1,15 +1,15 @@
-{{ if .Values.storage.testing }}
+{{ if .Values.storage.opt }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "irods-service.fullname" . }}-testing-pvc
+  name: {{ include "irods-service.fullname" . }}-opt-pvc
 spec:
   accessModes:
-  - {{ .Values.storage.testing.accessMode }}
+  - {{ .Values.storage.opt.accessMode }}
   resources:
     requests:
-      storage: {{ .Values.storage.testing.size }}
+      storage: {{ .Values.storage.opt.size }}
 {{ end }}
 {{ if .Values.storage.var }}
 ---
