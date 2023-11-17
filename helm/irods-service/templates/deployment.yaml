@@ -43,8 +43,8 @@ spec:
       containers:
         - name: {{ include "irods-service.fullname" . }}
           command: [ '/bin/bash' , '-c']
-          {{- if .Values.serverInit.isProvider }}
-          args: [ '{{ .Values.serverInit.initScriptMountPath }} && until false; do sleep 2147483647d; done;' ]
+          {{- if not .Values.serviceInit.isProvider }}
+          args: [ '{{ .Values.serviceInit.initScriptMountPath }} && until false; do sleep 2147483647d; done;' ]
           {{- else }}
           args: ['until false; do sleep 2147483647d; done;']
           {{- end }}
@@ -72,27 +72,28 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          {{- if .Values.serverInit.isProvider }}
           - name: init-irods-script
-            mountPath: {{ .Values.serverInit.initScriptMountPath }}
-            subPath: {{ .Values.serverInit.initScriptName | quote }}
+            mountPath: {{ .Values.serviceInit.initScriptMountPath }}
+            subPath: {{ .Values.serviceInit.initScriptName | quote }}
           - name: init-service-script
-            mountPath: {{ .Values.serverInit.serviceInitMountPath }}
-            subPath: {{ .Values.serverInit.serviceInitName | quote }}
+            mountPath: {{ .Values.serviceInit.serviceInitMountPath }}
+            subPath: {{ .Values.serviceInit.serviceInitName | quote }}
           - name: init-logging-script
             mountPath: /etc/rsyslog.d/00-irods.conf
             subPath: "00-irods.conf"
           - name: init-logcfg-script
             mountPath: /etc/logrotate.d/irods
             subPath: "irods"
-          {{- end }}
-          {{- if .Values.storage.testing }}
-          - name: {{ .Values.storage.testing.name }}
-            mountPath: {{ .Values.storage.testing.mountPath }}
-          {{- end }}
+          - name: dsd-script
+            mountPath: /irods/dsd.py
+            subPath: "dsd.py"
           {{- if .Values.storage.var }}
           - name: {{ .Values.storage.var.name }}
             mountPath: {{ .Values.storage.var.mountPath }}
+          {{- end }}
+          {{- if .Values.storage.opt }}
+          - name: {{ .Values.storage.opt.name }}
+            mountPath: {{ .Values.storage.opt.mountPath }}
           {{- end }}
           {{- if .Values.storage.zone }}
           - name: {{ .Values.storage.zone.name }}
@@ -111,7 +112,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-      {{- if .Values.serverInit.isProvider }}
         - name: init-irods-script
           configMap:
             name: "{{- include "irods-service.fullname" . }}-scripts"
@@ -128,11 +128,14 @@ spec:
           configMap:
             name: "{{- include "irods-service.fullname" . }}-scripts"
             defaultMode: 0777
-      {{- end }}
-      {{- if .Values.storage.testing }}
-        - name: {{ .Values.storage.testing.name }}
+        - name: dsd-script
+          configMap:
+            name: "{{- include "irods-service.fullname" . }}-scripts"
+            defaultMode: 0777
+      {{- if .Values.storage.opt }}
+        - name: {{ .Values.storage.opt.name }}
           persistentVolumeClaim:
-            claimName: {{ include "irods-service.fullname" . }}-testing-pvc
+            claimName: {{ include "irods-service.fullname" . }}-opt-pvc
       {{- end }}
       {{- if .Values.storage.var }}
         - name: {{ .Values.storage.var.name }}
