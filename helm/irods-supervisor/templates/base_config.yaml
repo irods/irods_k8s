@@ -229,11 +229,113 @@ data:
     #cp /etc/irods/server_config.json.2 /etc/irods/server_config.json;
 
     # start the tests
-    #su irods
-    #cd /var/lib/irods;
-    #python3 scripts/run_tests.py --run_s test_ils;
+    #cd /var/lib/irods && python3 scripts/run_tests.py --run_s test_ils;
+    #cd /var/lib/irods && python3 scripts/run_tests.py --xml_output --run_s test_ils;
+    #cd /var/lib/irods && sudo -u irods -H bash -c "/irods/allCoreTests.sh";
+    cd /var/lib/irods && sudo -u irods -H bash -c "/irods/testBrief.sh";
+    touch /data/${HN_arr[1]}/test_complete
 
+    # wait forever
     until false; do sleep 10000; done;
+
+  testBrief.sh: |-
+    #/bin/bash
+    cd /var/lib/irods;
+    echo "running test_ils"; python3 scripts/run_tests.py --run_s test_ils;
+
+  allCoreTests.sh: |-
+    #/bin/bash
+    cd /var/lib/irods;
+    #echo "running test_auth"; python3 scripts/run_tests.py --run_s test_auth; OS user "[irodsauthuser]" with password "[;=iamnotasecret]" must exist in order to run these tests.
+    #echo "running test_all_rules"; python3 scripts/run_tests.py --run_s test_all_rules; exception dump
+    echo "running test_catalog"; python3 scripts/run_tests.py --run_s test_catalog;
+    echo "running test_chunkydevtest"; python3 scripts/run_tests.py --run_s test_chunkydevtest;
+    echo "running test_client_hints"; python3 scripts/run_tests.py --run_s test_client_hints;
+    echo "running test_collection_mtime"; python3 scripts/run_tests.py --run_s test_collection_mtime;
+    echo "running test_compatibility"; python3 scripts/run_tests.py --run_s test_compatibility;
+    echo "running test_configuration_reload"; python3 scripts/run_tests.py --run_s test_configuration_reload;
+    echo "running test_control_plan"; python3 scripts/run_tests.py --run_s test_control_plan;
+    echo "running test_delay_queue"; python3 scripts/run_tests.py --run_s test_delay_queue;
+    echo "running test_dynamic_peps"; python3 scripts/run_tests.py --run_s test_dynamic_peps;
+    echo "running test_experimental_parallel_copy"; python3 scripts/run_tests.py --run_s test_experimental_parallel_copy;
+    echo "running test_experimental_parallel_remove"; python3 scripts/run_tests.py --run_s test_experimental_parallel_remove;
+    echo "running test_experimental_parallel_replication"; python3 scripts/run_tests.py --run_s test_experimental_parallel_replication;
+    echo "running test_faulty_filesystem"; python3 scripts/run_tests.py --run_s test_faulty_filesystem;
+    echo "running test_federation"; python3 scripts/run_tests.py --run_s test_federation;
+    echo "running test_iadmin"; python3 scripts/run_tests.py --run_s test_iadmin;
+    echo "running test_iadmin_set_grid_configuration"; python3 scripts/run_tests.py --run_s test_iadmin_set_grid_configuration;
+    echo "running test_ibun"; python3 scripts/run_tests.py --run_s test_ibun;
+    echo "running test_icd"; python3 scripts/run_tests.py --run_s test_icd;
+    echo "running test_ichksum"; python3 scripts/run_tests.py --run_s test_ichksum;
+    echo "running test_ichmod"; python3 scripts/run_tests.py --run_s test_ichmod;
+    echo "running test_icommands_file_operations"; python3 scripts/run_tests.py --run_s test_icommands_file_operations;
+    echo "running test_icp"; python3 scripts/run_tests.py --run_s test_icp;
+    echo "running test_iexit"; python3 scripts/run_tests.py --run_s test_iexit;
+    echo "running test_ifsck"; python3 scripts/run_tests.py --run_s test_ifsck;
+    echo "running test_iget"; python3 scripts/run_tests.py --run_s test_iget;
+    echo "running test_igroupadmin"; python3 scripts/run_tests.py --run_s test_igroupadmin;
+    echo "running test_ihelp"; python3 scripts/run_tests.py --run_s test_ihelp;
+    echo "running test_ilocate"; python3 scripts/run_tests.py --run_s test_ilocate;
+    echo "running test_ils"; python3 scripts/run_tests.py --run_s test_ils;
+    echo "running test_ilsresc"; python3 scripts/run_tests.py --run_s test_ilsresc;
+    echo "running test_imeta_admin_mode"; python3 scripts/run_tests.py --run_s test_imeta_admin_mode;
+    echo "running test_imeta_error_handling"; python3 scripts/run_tests.py --run_s test_imeta_error_handling;
+    echo "running test_imeta_help"; python3 scripts/run_tests.py --run_s test_imeta_help;
+    echo "running test_imeta_interactive"; python3 scripts/run_tests.py --run_s test_imeta_interactive;
+    echo "running test_imeta_set"; python3 scripts/run_tests.py --run_s test_imeta_set;
+    echo "running test_imkdir"; python3 scripts/run_tests.py --run_s test_imkdir;
+    echo "running test_imv"; python3 scripts/run_tests.py --run_s test_imv;
+    echo "running test_ipasswd"; python3 scripts/run_tests.py --run_s test_ipasswd;
+    echo "running test_iphymv"; python3 scripts/run_tests.py --run_s test_iphymv;
+    echo "running test_iput"; python3 scripts/run_tests.py --run_s test_iput;
+    echo "running test_iput_options"; python3 scripts/run_tests.py --run_s test_iput_options;
+    echo "running test_ipwd"; python3 scripts/run_tests.py --run_s test_ipwd;
+    echo "running test_iqmod"; python3 scripts/run_tests.py --run_s test_iqmod;
+    echo "running test_iqstat"; python3 scripts/run_tests.py --run_s test_iqstat;
+    echo "running test_iquest"; python3 scripts/run_tests.py --run_s test_iquest;
+    echo "running test_ireg"; python3 scripts/run_tests.py --run_s test_ireg;
+    echo "running test_irepl"; python3 scripts/run_tests.py --run_s test_irepl;
+    echo "running test_irm"; python3 scripts/run_tests.py --run_s test_irm;
+    echo "running test_irmdir"; python3 scripts/run_tests.py --run_s test_irmdir;
+    echo "running test_irmtrash"; python3 scripts/run_tests.py --run_s test_irmtrash;
+    echo "running test_irodsctl"; python3 scripts/run_tests.py --run_s test_irodsctl;
+    echo "running test_irsync"; python3 scripts/run_tests.py --run_s test_irsync;
+    echo "running test_irule"; python3 scripts/run_tests.py --run_s test_irule;
+    echo "running test_iscan"; python3 scripts/run_tests.py --run_s test_iscan;
+    echo "running test_istream"; python3 scripts/run_tests.py --run_s test_istream;
+    echo "running test_isysmeta"; python3 scripts/run_tests.py --run_s test_isysmeta;
+    echo "running test_iticket"; python3 scripts/run_tests.py --run_s test_iticket;
+    echo "running test_itouch"; python3 scripts/run_tests.py --run_s test_itouch;
+    echo "running test_itree"; python3 scripts/run_tests.py --run_s test_itree;
+    echo "running test_itrim"; python3 scripts/run_tests.py --run_s test_itrim;
+    echo "running test_iunreg"; python3 scripts/run_tests.py --run_s test_iunreg;
+    echo "running test_iuserinfo"; python3 scripts/run_tests.py --run_s test_iuserinfo;
+    echo "running test_izonereport"; python3 scripts/run_tests.py --run_s test_izonereport;
+    echo "running test_load_balanced_suite"; python3 scripts/run_tests.py --run_s test_load_balanced_suite;
+    echo "running test_log_levels"; python3 scripts/run_tests.py --run_s test_log_levels;
+    echo "running test_misc"; python3 scripts/run_tests.py --run_s test_misc;
+    echo "running test_native_authentication"; python3 scripts/run_tests.py --run_s test_native_authentication;
+    echo "running test_native_rule_engine_plugin"; python3 scripts/run_tests.py --run_s test_native_rule_engine_plugin;
+    echo "running test_negotiation"; python3 scripts/run_tests.py --run_s test_negotiation;
+    echo "running test_pam_password_authentication"; python3 scripts/run_tests.py --run_s test_pam_password_authentication;
+    echo "running test_prep_genquery_iterator"; python3 scripts/run_tests.py --run_s test_prep_genquery_iterator;
+    echo "running test_python_rule_engine_plugin"; python3 scripts/run_tests.py --run_s test_python_rule_engine_plugin;
+    echo "running test_quotas"; python3 scripts/run_tests.py --run_s test_quotas;
+    echo "running test_remote_server_properties"; python3 scripts/run_tests.py --run_s test_remote_server_properties;
+    echo "running test_resource_configuration"; python3 scripts/run_tests.py --run_s test_resource_configuration;
+    echo "running test_resource_tree"; python3 scripts/run_tests.py --run_s test_resource_tree;
+    echo "running test_resource_types"; python3 scripts/run_tests.py --run_s test_resource_types;
+    echo "running test_rule_engine_plugin_framework"; python3 scripts/run_tests.py --run_s test_rule_engine_plugin_framework;
+    echo "running test_rule_engine_plugin_passthrough"; python3 scripts/run_tests.py --run_s test_rule_engine_plugin_passthrough;
+    echo "running test_rulebase"; python3 scripts/run_tests.py --run_s test_rulebase;
+    echo "running test_special_collections"; python3 scripts/run_tests.py --run_s test_special_collections;
+    echo "running test_specific_queries"; python3 scripts/run_tests.py --run_s test_specific_queries;
+    echo "running test_ssl"; python3 scripts/run_tests.py --run_s test_ssl;
+    echo "running test_stacktrace"; python3 scripts/run_tests.py --run_s test_stacktrace;
+    echo "running test_symlink_operations"; python3 scripts/run_tests.py --run_s test_symlink_operations;
+    echo "running test_targeting_specific_replica_number"; python3 scripts/run_tests.py --run_s test_targeting_specific_replica_number;
+    echo "running test_util"; python3 scripts/run_tests.py --run_s test_util;
+    echo "running timing_tests"; python3 scripts/run_tests.py --run_s timing_tests;
 
   irodsConsumerInstall.sh: |-
     #/bin/bash
