@@ -269,13 +269,15 @@ data:
 
     # here we are setting up a couple sleep loops to get around
     # a known issue with a client startup
-    until nc -z ${PROVIDER_NAME} 1247 do sleep 1; done;
+    until nc -z ${PROVIDER_NAME} 1247
+    do sleep 1; done;
 
     # delay some more for another service to come up
     sleep 3;
 
     # finally one more pause to insure we can continue
-    until nc -z ${PROVIDER_NAME} 1247 do sleep 1; done;
+    until nc -z ${PROVIDER_NAME} 1247
+    do sleep 1; done;
 
     echo "Provider aliveness check complete";
 
