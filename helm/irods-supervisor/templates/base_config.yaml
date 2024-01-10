@@ -193,6 +193,10 @@ data:
 
   irodsProviderInstall.sh: |-
     #/bin/bash
+    #
+    # note this has been deprecated (for now) as the consumer would never be run in core testing
+    #
+
     # install OS updates
     apt-get update;
     apt-get -y upgrade;
@@ -210,16 +214,26 @@ data:
     echo "${REMOTE_HOST_ENTRY}" >> /data/${HN_arr[1]}/remote_provider_host_entries;
 
     # do not continue until the consumer has created it's host entries file
-    while [ ! -f /data/${HN_arr[1]}/remote_consumer_host_entries ]; do echo "Provider waiting 5 seconds for consumer..." && sleep 5; done;
+    #while [ ! -f /data/${HN_arr[1]}/remote_consumer_host_entries.sh ]; do echo "Provider waiting 5 seconds for consumer..." && sleep 5; done;
 
     # replace the hostname and db name in the provider initialization json
     sed 's/HOSTNAME_TEMPLATE/'"${HOST_SERVICE_NAME}"'/g' /irods/providerInit.json > /tmp/providerInit.json.1;
     sed 's/DBNAME_TEMPLATE/'"${DB_SERVICE_NAME}"'/g' /tmp/providerInit.json.1 > /tmp/providerInit.json.2;
 
-    # add the contents of the host names for the consumer and provider into the provider init json
-    jq --slurpfile hosts /data/${HN_arr[1]}/remote_consumer_host_entries '.server_config.host_resolution.host_entries = $hosts' < /tmp/providerInit.json.2 > /tmp/providerInit.json.3;
-    jq --slurpfile hosts /data/${HN_arr[1]}/local_provider_host_entries '.server_config.host_resolution.host_entries |= .+ $hosts' < /tmp/providerInit.json.3 > /tmp/providerInit.json.4;
-    cp /tmp/providerInit.json.4 /tmp/providerInit.json;
+    # add the provider host data to the init
+    jq --slurpfile hosts /data/${HN_arr[1]}/local_provider_host_entries '.server_config.host_resolution.host_entries = $hosts' < /tmp/providerInit.json.2 > /tmp/providerInit.json.3;
+
+    # if there are consumer tests presume we should add the consumer hostname to the prover config
+    if [ -f /data/${HN_arr[1]}/CONSUMER_test_list.sh ]; then
+      # add the contents of the host names for the consumer and provider into the provider init json
+      jq --slurpfile hosts /data/${HN_arr[1]}/remote_consumer_host_entries '.server_config.host_resolution.host_entries |= .+ $hosts' < /tmp/providerInit.json.3 > /tmp/providerInit.json.4;
+
+      # update the final provider init config
+      cp /tmp/providerInit.json.4 /tmp/providerInit.json;
+    else
+      # update the final provider init config
+      cp /tmp/providerInit.json.3 /tmp/providerInit.json;
+    fi
 
     # setup irods and start it
     python3 /var/lib/irods/scripts/setup_irods.py --json_configuration_file /tmp/providerInit.json;
@@ -228,10 +242,54 @@ data:
     # start the tests
     TEST_FILE=/data/${HN_arr[1]}/PROVIDER_test_list.sh
 
-    # if the test file exists run the tests therein
-    if [ -f "$TEST_FILE"]; then
+    # if the provider test file script exists run it
+    if [ -f "$TEST_FILE" ]; then
       cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/PROVIDER_test_list.sh";
-      touch /data/${HN_arr[1]}/PROVIDER_test_list
+      touch /data/${HN_arr[1]}/PROVIDER_tests.complete
+    fi
+
+    # wait forever
+    until false; do sleep 10000; done;
+
+  irodsProviderCoreInstall.sh: |-
+    #/bin/bash
+    # install OS updates
+    apt-get update;
+    apt-get -y upgrade;
+    apt-get -y install irods-server irods-database-plugin-postgres jq nano;
+    apt-get autoclean;
+
+    # host names come in the form <name of job>_<id of job>_<pod guid>, ex: provider_3_wtf2u
+    # break it into pieces and create hostname entries for irods and save them in a file on a shared directory.
+    HN_arr=(${HOSTNAME//-/ });
+    HOST_SERVICE_NAME="${HN_arr[0]}-${HN_arr[1]}"
+    LOCAL_HOST_ENTRY='{"address_type": "local","addresses": ["'${HN_arr[0]}'-'${HN_arr[1]}'","'${HOSTNAME}'"]}';
+    REMOTE_HOST_ENTRY='{"address_type": "remote","addresses": ["'${HN_arr[0]}'-'${HN_arr[1]}'","'${HOSTNAME}'"]}';
+
+    echo "${LOCAL_HOST_ENTRY}" >> /data/${HN_arr[1]}/local_provider_host_entries;
+    echo "${REMOTE_HOST_ENTRY}" >> /data/${HN_arr[1]}/remote_provider_host_entries;
+
+    # replace the hostname and db name in the provider initialization json
+    sed 's/HOSTNAME_TEMPLATE/'"${HOST_SERVICE_NAME}"'/g' /irods/providerInit.json > /tmp/providerInit.json.1;
+    sed 's/DBNAME_TEMPLATE/'"${DB_SERVICE_NAME}"'/g' /tmp/providerInit.json.1 > /tmp/providerInit.json.2;
+
+    # add the provider host data to the init
+    jq --slurpfile hosts /data/${HN_arr[1]}/local_provider_host_entries '.server_config.host_resolution.host_entries = $hosts' < /tmp/providerInit.json.2 > /tmp/providerInit.json.3;
+
+    # update the final provider init config
+    cp /tmp/providerInit.json.3 /tmp/providerInit.json;
+
+    # setup irods and start it
+    python3 /var/lib/irods/scripts/setup_irods.py --json_configuration_file /tmp/providerInit.json;
+    su - irods -c './irodsctl start -v';
+
+    # start the tests
+    TEST_FILE=/data/${HN_arr[1]}/PROVIDER_test_list.sh
+
+    # if the provider test file script exists run it
+    if [ -f "$TEST_FILE" ]; then
+      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/PROVIDER_test_list.sh >> /data/${HN_arr[1]}/forensics.log";
+      touch /data/${HN_arr[1]}/PROVIDER_tests.complete
     fi
 
     # wait forever
@@ -294,9 +352,9 @@ data:
     TEST_FILE=/data/${HN_arr[1]}/CONSUMER_test_list.sh
 
     # if the test file exists run the tests therein
-    if [ -f "$TEST_FILE"]; then
+    if [ -f "$TEST_FILE" ]; then
       cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/CONSUMER_test_list.sh";
-      touch /data/${HN_arr[1]}/CONSUMER_test_list
+      touch /data/${HN_arr[1]}/CONSUMER_tests.complete
     fi
 
     until false; do sleep 10000; done;
