@@ -226,10 +226,13 @@ data:
     su - irods -c './irodsctl start -v';
 
     # start the tests
-    #cd /var/lib/irods && python3 scripts/run_tests.py --run_s test_ils;
-    #cd /var/lib/irods && python3 scripts/run_tests.py --xml_output --run_s test_ils;
-    cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/PROVIDER_test_list.json.sh";
-    touch /data/${HN_arr[1]}/PROVIDER_test_complete
+    TEST_FILE=/data/${HN_arr[1]}/PROVIDER_test_list.sh
+
+    # if the test file exists run the tests therein
+    if [ -f "$TEST_FILE"]; then
+      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/PROVIDER_test_list.sh";
+      touch /data/${HN_arr[1]}/PROVIDER_test_list
+    fi
 
     # wait forever
     until false; do sleep 10000; done;
@@ -284,13 +287,19 @@ data:
     python3 /var/lib/irods/scripts/setup_irods.py --json_configuration_file /tmp/consumerInit.json;
     su - irods -c './irodsctl start -v';
 
-    # start the tests
     #cd /var/lib/irods && python3 scripts/run_tests.py --run_s test_ils;
     #cd /var/lib/irods && python3 scripts/run_tests.py --xml_output --run_s test_ils;
-    cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/CONSUMER_test_list.json.sh";
-    touch /data/${HN_arr[1]}/PROVIDER_test_complete
 
-    until false; do sleep 2147483647d; done;
+    # start the tests
+    TEST_FILE=/data/${HN_arr[1]}/CONSUMER_test_list.sh
+
+    # if the test file exists run the tests therein
+    if [ -f "$TEST_FILE"]; then
+      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/CONSUMER_test_list.sh";
+      touch /data/${HN_arr[1]}/CONSUMER_test_list
+    fi
+
+    until false; do sleep 10000; done;
 
   consumerInit.json: |-
     {
