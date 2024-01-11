@@ -291,6 +291,7 @@ data:
       echo "Starting tests...";
       cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/PROVIDER_test_list.sh >> /data/${HN_arr[1]}/forensics.log";
       touch /data/${HN_arr[1]}/PROVIDER_tests.complete
+      echo "Testing complete.";
     fi
 
     # wait forever
