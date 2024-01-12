@@ -214,7 +214,7 @@ data:
     echo "${REMOTE_HOST_ENTRY}" >> /data/${HN_arr[1]}/remote_provider_host_entries;
 
     # do not continue until the consumer has created it's host entries file
-    #while [ ! -f /data/${HN_arr[1]}/remote_consumer_host_entries.sh ]; do echo "Provider waiting 5 seconds for consumer..." && sleep 5; done;
+    while [ ! -f /data/${HN_arr[1]}/remote_consumer_host_entries.sh ]; do echo "Provider waiting 5 seconds for consumer..." && sleep 5; done;
 
     # replace the hostname and db name in the provider initialization json
     sed 's/HOSTNAME_TEMPLATE/'"${HOST_SERVICE_NAME}"'/g' /irods/providerInit.json > /tmp/providerInit.json.1;
