@@ -314,6 +314,9 @@ data:
     # declare an array of potential consumer types
     declare -a arr=("CONSUMER" "CONSUMERSECONDARY" "CONSUMERTERTIARY")
 
+    # declare and init an array for host names
+    declare -a hostname_arr=(${HOSTNAME})
+
     # loop through the potential consumers
     for item in "${arr[@]}"
     do
@@ -321,8 +324,6 @@ data:
 
     # if the env param for this service is true (T) add the consumer hostname to the provider config
       if [ ${!item}  == "T" ]; then
-        echo "counter is: $((cntr))"
-
         # do not continue until the consumer has created it's host entries file
         while [ ! -f /data/${HN_arr[1]}/remote_${item}_host_entries ]; do echo "Provider waiting 15 seconds for ${item} host name entries..." && sleep 15; done;
 
@@ -330,6 +331,9 @@ data:
 
         # add the contents of the host names for the consumer and provider into the provider init json
         jq --slurpfile hosts /data/${HN_arr[1]}/remote_${item}_host_entries '.server_config.host_resolution.host_entries |= .+ $hosts' < /data/${HN_arr[1]}/providerInit.json.$((cntr)) > /data/${HN_arr[1]}/providerInit.json.$((cntr+1));
+
+        # put the hostname into the array for later
+        hostname_arr+=("$(jq -r .addresses[0] /data/${HN_arr[1]}/remote_${item}_host_entries)")
 
         # increment the counter
         cntr=$((cntr+1))
@@ -353,8 +357,17 @@ data:
     if [ -f /data/${HN_arr[1]}/PROVIDER_test_list.sh ]; then
       echo "Starting tests...";
 
+      # compile the list of host names
+      jq .addresses[0] /data/18/remote_PROVIDER_host_entries
+
+      # substitute the host names into the test command lines in the provider test list
+      sed s/TEST_HOST_NAMES/"${hostname_arr[*]}"/g /data/18/PROVIDER_test_list.sh > /data/18/PROVIDER_test_list.0.sh;
+
+      # make sure this file is executable
+      chmod +x /data/18/PROVIDER_test_list.0.sh;
+
       # go the irods directory, change to the irods user and run the tests
-      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/PROVIDER_test_list.sh >> /data/${HN_arr[1]}/forensics.log";
+      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/PROVIDER_test_list.0.sh >> /data/${HN_arr[1]}/forensics.log";
 
       # generate the testing complete marker
       touch /data/${HN_arr[1]}/PROVIDER_tests.complete
@@ -536,8 +549,9 @@ data:
     while [ ! -f /data/${HN_arr[1]}/remote_PROVIDER_host_entries ]; do echo "Consumer waiting for 5 seconds for provider host name entries..." && sleep 5; done;
     echo "Provider found for CONSUMER: ${PROVIDER_NAME}";
 
-    # replace the hostname and provider name in the consumer initialization json
-    sed 's/HOSTNAME_TEMPLATE/'"${HOST_SERVICE_NAME}"'/g' /irods/consumerInit.json > /data/${HN_arr[1]}/consumerInit.json.1;
+    # replace the resource, host and provider names in the consumer initialization json
+    sed 's/otherResc/'"otherResc-${HN_arr[1]}"'/g' /irods/consumerInit.json > /data/${HN_arr[1]}/consumerInit.json.0;
+    sed 's/HOSTNAME_TEMPLATE/'"${HOST_SERVICE_NAME}"'/g' /data/${HN_arr[1]}/consumerInit.json.0 > /data/${HN_arr[1]}/consumerInit.json.1;
     sed 's/PROVIDER_TEMPLATE/'"${PROVIDER_NAME}"'/g' /data/${HN_arr[1]}/consumerInit.json.1 > /data/${HN_arr[1]}/consumerInit.json.2;
 
      # add the contents of the host names for the consumer and provider into the consumer init json
@@ -549,6 +563,9 @@ data:
 
     # declare an array of potential consumer types
     declare -a arr=("CONSUMERSECONDARY" "CONSUMERTERTIARY")
+
+    # declare and init an array for host names
+    declare -a hostname_arr=(${PROVIDER_NAME} ${HOSTNAME})
 
     # loop through the potential consumers
     for item in "${arr[@]}"
@@ -566,6 +583,9 @@ data:
 
         # add the contents of the host names for the consumer and provider into the provider init json
         jq --slurpfile hosts /data/${HN_arr[1]}/remote_${item}_host_entries '.server_config.host_resolution.host_entries |= .+ $hosts' < /data/${HN_arr[1]}/consumerInit.json.$((cntr)) > /data/${HN_arr[1]}/consumerInit.json.$((cntr+1));
+
+        # put the hostname into the array for later
+        hostname_arr+=("$(jq -r .addresses[0] /data/${HN_arr[1]}/remote_${item}_host_entries)")
 
         # increment the counter
         cntr=$((cntr+1))
@@ -634,8 +654,9 @@ data:
     while [ ! -f /data/${HN_arr[1]}/remote_PROVIDER_host_entries ]; do echo "Consumer Secondary waiting for 5 seconds for provider host name entries..." && sleep 5; done;
     echo "Provider found for CONSUMERSECONDARY: ${PROVIDER_NAME}";
 
-    # replace the hostname and provider name in the consumer initialization json
-    sed 's/HOSTNAME_TEMPLATE/'"${HOST_SERVICE_NAME}"'/g' /irods/consumerInit.json > /data/${HN_arr[1]}/consumerSecondaryInit.json.1;
+    # replace the resource, host and provider names in the consumer initialization json
+    sed 's/otherResc/'"secondaryResc-${HN_arr[1]}"'/g' /irods/consumerInit.json > /data/${HN_arr[1]}/consumerSecondaryInit.json.0;
+    sed 's/HOSTNAME_TEMPLATE/'"${HOST_SERVICE_NAME}"'/g' /data/${HN_arr[1]}/consumerSecondaryInit.json.0 > /data/${HN_arr[1]}/consumerSecondaryInit.json.1;
     sed 's/PROVIDER_TEMPLATE/'"${PROVIDER_NAME}"'/g' /data/${HN_arr[1]}/consumerSecondaryInit.json.1 > /data/${HN_arr[1]}/consumerSecondaryInit.json.2;
 
     # add the contents of the host names for the consumer and provider into the consumer init json
@@ -647,6 +668,9 @@ data:
 
     # declare an array of potential consumer types
     declare -a arr=("CONSUMER" "CONSUMERTERTIARY")
+
+    # declare and init an array for host names
+    declare -a hostname_arr=(${PROVIDER_NAME} ${HOSTNAME})
 
     # loop through the potential consumers
     for item in "${arr[@]}"
@@ -664,6 +688,9 @@ data:
 
         # add the contents of the host names for the consumer and provider into the provider init json
         jq --slurpfile hosts /data/${HN_arr[1]}/remote_${item}_host_entries '.server_config.host_resolution.host_entries |= .+ $hosts' < /data/${HN_arr[1]}/consumerSecondaryInit.json.$((cntr)) > /data/${HN_arr[1]}/consumerSecondaryInit.json.$((cntr+1));
+
+        # put the hostname into the array for later
+        hostname_arr+=("$(jq -r .addresses[0] /data/${HN_arr[1]}/remote_${item}_host_entries)")
 
         # increment the counter
         cntr=$((cntr+1))
@@ -732,8 +759,9 @@ data:
     while [ ! -f /data/${HN_arr[1]}/remote_PROVIDER_host_entries ]; do echo "Consumer Tertiary waiting for 5 seconds for provider host name entries..." && sleep 5; done;
     echo "Provider found for CONSUMERTERTIARY: ${PROVIDER_NAME}";
 
-    # replace the hostname and provider name in the consumer initialization json
-    sed 's/HOSTNAME_TEMPLATE/'"${HOST_SERVICE_NAME}"'/g' /irods/consumerInit.json > /data/${HN_arr[1]}/consumerTertiaryInit.json.1;
+    # replace the resource, host and provider names in the consumer initialization json
+    sed 's/otherResc/'"tertiaryResc-${HN_arr[1]}"'/g' /irods/consumerInit.json > /data/${HN_arr[1]}/consumerTertiaryInit.json.0;
+    sed 's/HOSTNAME_TEMPLATE/'"${HOST_SERVICE_NAME}"'/g' /data/${HN_arr[1]}/consumerTertiaryInit.json.0 > /data/${HN_arr[1]}/consumerTertiaryInit.json.1;
     sed 's/PROVIDER_TEMPLATE/'"${PROVIDER_NAME}"'/g' /data/${HN_arr[1]}/consumerTertiaryInit.json.1 > /data/${HN_arr[1]}/consumerTertiaryInit.json.2;
 
     # add the contents of the host names for the consumer and provider into the consumer init json
@@ -745,6 +773,9 @@ data:
 
     # declare an array of potential consumer types
     declare -a arr=("CONSUMER" "CONSUMERSECONDARY")
+
+    # declare and init an array for host names
+    declare -a hostname_arr=(${PROVIDER_NAME} ${HOSTNAME})
 
     # loop through the potential consumers
     for item in "${arr[@]}"
@@ -762,6 +793,9 @@ data:
 
         # add the contents of the host names for the consumer and provider into the provider init json
         jq --slurpfile hosts /data/${HN_arr[1]}/remote_${item}_host_entries '.server_config.host_resolution.host_entries |= .+ $hosts' < /data/${HN_arr[1]}/consumerTertiaryInit.json.$((cntr)) > /data/${HN_arr[1]}/consumerTertiaryInit.json.$((cntr+1));
+
+        # put the hostname into the array for later
+        hostname_arr+=("$(jq -r .addresses[0] /data/${HN_arr[1]}/remote_${item}_host_entries)")
 
         # increment the counter
         cntr=$((cntr+1))
