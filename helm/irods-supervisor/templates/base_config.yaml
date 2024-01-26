@@ -199,7 +199,7 @@ data:
     # install OS updates
     apt-get update;
     apt-get -y upgrade;
-    apt-get -y install irods-server jq nano;
+    apt-get -y install irods-server jq;
 
     # install the correct DB driver and save the db type
     if [ "$DB_DRIVER_NAME" = "PostgreSQL ANSI" ]; then
@@ -239,20 +239,16 @@ data:
     # switch to the irods user and start the service
     su - irods -c './irodsctl start -v';
 
-    echo "Startup complete."
-
     # if the provider test file script exists run it
     if [ -f /data/${HN_arr[1]}/PROVIDER_test_list.sh ]; then
-      echo "Starting tests...";
-
       # go the irods directory, change to the irods user and run the tests
       cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/PROVIDER_test_list.sh >> /data/${HN_arr[1]}/PROVIDER_forensics.log";
 
-      # generate the testing complete marker
-      touch /data/${HN_arr[1]}/PROVIDER_tests.complete
-
       echo "Testing complete.";
     fi
+
+    # generate the testing complete marker
+    touch /data/${HN_arr[1]}/PROVIDER_tests.complete
 
     # wait forever
     until false; do sleep 10000; done;
@@ -268,19 +264,13 @@ data:
     # install OS updates
     apt-get update;
     apt-get -y upgrade;
-    apt-get -y install irods-server jq nano wget;
+    apt-get -y install irods-server jq;
 
-    # install the correct DB driver and db type
+    # install the correct DB driver and save the db type
     if [ "$DB_DRIVER_NAME" = "PostgreSQL ANSI" ]; then
       apt-get -y install irods-database-plugin-postgres
       DB_TYPE_NAME="postgres"
     else
-      # note that there are odbc driver installation issues with mysql deploys
-      # https://dev.mysql.com/get/Downloads/Connector-ODBC/8.0/mysql-connector-odbc-8.0.29-linux-glibc2.12-x86-64bit.tar.gz
-      # https://downloads.mysql.com/archives/get/p/10/file/mysql-connector-odbc-setup-dbgsym_8.0.30-1ubuntu20.04_amd64.deb
-      # install the driver
-      # create the odbc init init file
-
       apt-get -y irods-database-plugin-mysql
       DB_TYPE_NAME="mysql"
     fi
@@ -320,14 +310,10 @@ data:
     # loop through the potential consumers
     for item in "${arr[@]}"
     do
-      echo "The workflow consumer type: ${item} has a value of: ${!item}";
-
-    # if the env param for this service is true (T) add the consumer hostname to the provider config
+      # if the env param for this service is true (T) add the consumer hostname to the provider config
       if [ ${!item}  == "T" ]; then
         # do not continue until the consumer has created it's host entries file
-        while [ ! -f /data/${HN_arr[1]}/remote_${item}_host_entries ]; do echo "Provider waiting 15 seconds for ${item} host name entries..." && sleep 15; done;
-
-        echo "Remote consumer file name found: /data/${HN_arr[1]}/remote_${item}_host_entries"
+        while [ ! -f /data/${HN_arr[1]}/remote_${item}_host_entries ]; do echo "Waiting 15 seconds for ${item} host name entries..." && sleep 15; done;
 
         # add the contents of the host names for the consumer and provider into the provider init json
         jq --slurpfile hosts /data/${HN_arr[1]}/remote_${item}_host_entries '.server_config.host_resolution.host_entries |= .+ $hosts' < /data/${HN_arr[1]}/providerInit.json.$((cntr)) > /data/${HN_arr[1]}/providerInit.json.$((cntr+1));
@@ -349,16 +335,19 @@ data:
     su - irods -c './irodsctl start -v';
 
     # generate the startup complete marker
-    touch /data/${HN_arr[1]}/provider.started
-
-    echo "Provider started."
+    touch /data/${HN_arr[1]}/PROVIDER.started
 
     # if the provider test file script exists run it
     if [ -f /data/${HN_arr[1]}/PROVIDER_test_list.sh ]; then
-      echo "Starting tests...";
-
-      # compile the list of host names
-      jq .addresses[0] /data/18/remote_PROVIDER_host_entries
+      # do not start tests until all consumers are up
+      for item in "${arr[@]}"
+      do
+        # if the env param for this service is true (T) check to see if it is running
+        if [ ${!item}  == "T" ]; then
+          # do not continue until the consumers has created it's host started file
+          while [ ! -f /data/${HN_arr[1]}/${item}.started ]; do echo "Waiting 15 seconds for ${item} host to start..." && sleep 15; done;
+        fi
+      done;
 
       # substitute the host names into the test command lines in the provider test list
       sed s/TEST_HOST_NAMES/"${hostname_arr[*]}"/g /data/18/PROVIDER_test_list.sh > /data/18/PROVIDER_test_list.0.sh;
@@ -367,13 +356,13 @@ data:
       chmod +x /data/18/PROVIDER_test_list.0.sh;
 
       # go the irods directory, change to the irods user and run the tests
-      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/PROVIDER_test_list.0.sh >> /data/${HN_arr[1]}/forensics.log";
-
-      # generate the testing complete marker
-      touch /data/${HN_arr[1]}/PROVIDER_tests.complete
+      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/PROVIDER_test_list.0.sh >> /data/${HN_arr[1]}/PROVIDER_forensics.log";
 
       echo "Testing complete.";
     fi
+
+    # generate the testing complete marker
+    touch /data/${HN_arr[1]}/PROVIDER_tests.complete
 
     # wait forever
     until false; do sleep 10000; done;
@@ -531,7 +520,7 @@ data:
     #/bin/bash
     apt-get update;
     apt-get -y upgrade;
-    apt-get -y install irods-server jq nano netcat;
+    apt-get -y install irods-server jq netcat;
     apt-get autoclean;
 
     # host names come in the form <name of job>_<id of job>_<pod guid>, ex: consumer_3_wtf2u
@@ -546,8 +535,7 @@ data:
     echo "${REMOTE_HOST_ENTRY}" >> /data/${HN_arr[1]}/remote_CONSUMER_host_entries;
 
     # do not continue until the provider has created it's host entries file
-    while [ ! -f /data/${HN_arr[1]}/remote_PROVIDER_host_entries ]; do echo "Consumer waiting for 5 seconds for provider host name entries..." && sleep 5; done;
-    echo "Provider found for CONSUMER: ${PROVIDER_NAME}";
+    while [ ! -f /data/${HN_arr[1]}/remote_PROVIDER_host_entries ]; do echo "Waiting for 5 seconds for provider host name entries..." && sleep 5; done;
 
     # replace the resource, host and provider names in the consumer initialization json
     sed 's/otherResc/'"otherResc-${HN_arr[1]}"'/g' /irods/consumerInit.json > /data/${HN_arr[1]}/consumerInit.json.0;
@@ -570,16 +558,10 @@ data:
     # loop through the potential consumers
     for item in "${arr[@]}"
     do
-      echo "The workflow consumer type: ${item} has a value of: ${!item}";
-
-    # if the env param for this service is true (T) add the consumer hostname to the provider config
+      # if the env param for this service is true (T) add the consumer hostname to the provider config
       if [ ${!item}  == "T" ]; then
-        echo "counter is: $((cntr))"
-
         # do not continue until the consumer has created it's host entries file
-        while [ ! -f /data/${HN_arr[1]}/remote_${item}_host_entries ]; do echo "Consumer waiting 15 seconds for ${item} host name entries..." && sleep 15; done;
-
-        echo "remote consumer file name found: /data/${HN_arr[1]}/remote_${item}_host_entries"
+        while [ ! -f /data/${HN_arr[1]}/remote_${item}_host_entries ]; do echo "Waiting 15 seconds for ${item} host name entries..." && sleep 15; done;
 
         # add the contents of the host names for the consumer and provider into the provider init json
         jq --slurpfile hosts /data/${HN_arr[1]}/remote_${item}_host_entries '.server_config.host_resolution.host_entries |= .+ $hosts' < /data/${HN_arr[1]}/consumerInit.json.$((cntr)) > /data/${HN_arr[1]}/consumerInit.json.$((cntr+1));
@@ -605,9 +587,7 @@ data:
     do sleep 1; done;
 
     # wait for the provider to come up
-    while [ ! -f /data/${HN_arr[1]}/provider.started ]; do echo "Consumer waiting 15 seconds for the provider to come up..." && sleep 15; done;
-
-    echo "Provider ready. Initializing and starting the service."
+    while [ ! -f /data/${HN_arr[1]}/PROVIDER.started ]; do echo "Waiting 15 seconds for the provider to come up..." && sleep 15; done;
 
     # setup irods and start it
     python3 /var/lib/irods/scripts/setup_irods.py --json_configuration_file /data/${HN_arr[1]}/consumerInit.json.$((cntr));
@@ -615,20 +595,25 @@ data:
     # switch to the irods user and start the service
     su - irods -c './irodsctl start -v';
 
-    echo "Startup complete."
+    # generate the startup complete marker
+    touch /data/${HN_arr[1]}/CONSUMER.started
 
     # if the consumer test file script exists run it
     if [ -f /data/${HN_arr[1]}/CONSUMER_test_list.sh ]; then
-      echo "Starting tests...";
+      # substitute the host names into the test command lines in the provider test list
+      sed s/TEST_HOST_NAMES/"${hostname_arr[*]}"/g /data/${HN_arr[1]}/CONSUMER_test_list.sh > /data/${HN_arr[1]}/CONSUMER_test_list.0.sh;
+
+      # make sure this file is executable
+      chmod +x /data/${HN_arr[1]}/CONSUMER_test_list.0.sh;
 
       # go the irods directory, change to the irods user and run the tests
-      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/CONSUMER_test_list.sh >> /data/${HN_arr[1]}/CONSUMER_forensics.log";
-
-      # generate the testing complete marker
-      touch /data/${HN_arr[1]}/CONSUMER_tests.complete
+      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/CONSUMER_test_list.0.sh >> /data/${HN_arr[1]}/CONSUMER_forensics.log";
 
       echo "Testing complete.";
     fi
+
+    # generate the testing complete marker
+    touch /data/${HN_arr[1]}/CONSUMER_tests.complete
 
     until false; do sleep 10000; done;
 
@@ -636,7 +621,7 @@ data:
     #/bin/bash
     apt-get update;
     apt-get -y upgrade;
-    apt-get -y install irods-server jq nano netcat;
+    apt-get -y install irods-server jq netcat;
     apt-get autoclean;
 
     # host names come in the form <name of job>_<id of job>_<pod guid>, ex: consumer_3_wtf2u
@@ -651,8 +636,7 @@ data:
     echo "${REMOTE_HOST_ENTRY}" >> /data/${HN_arr[1]}/remote_CONSUMERSECONDARY_host_entries;
 
     # do not continue until the provider has created it's host entries file
-    while [ ! -f /data/${HN_arr[1]}/remote_PROVIDER_host_entries ]; do echo "Consumer Secondary waiting for 5 seconds for provider host name entries..." && sleep 5; done;
-    echo "Provider found for CONSUMERSECONDARY: ${PROVIDER_NAME}";
+    while [ ! -f /data/${HN_arr[1]}/remote_PROVIDER_host_entries ]; do echo "Waiting for 5 seconds for provider host name entries..." && sleep 5; done;
 
     # replace the resource, host and provider names in the consumer initialization json
     sed 's/otherResc/'"secondaryResc-${HN_arr[1]}"'/g' /irods/consumerInit.json > /data/${HN_arr[1]}/consumerSecondaryInit.json.0;
@@ -675,16 +659,10 @@ data:
     # loop through the potential consumers
     for item in "${arr[@]}"
     do
-      echo "The workflow consumer type: ${item} has a value of: ${!item}";
-
-    # if the env param for this service is true (T) add the consumer hostname to the provider config
+      # if the env param for this service is true (T) add the consumer hostname to the provider config
       if [ ${!item}  == "T" ]; then
-        echo "counter is: $((cntr))"
-
         # do not continue until the consumer has created it's host entries file
-        while [ ! -f /data/${HN_arr[1]}/remote_${item}_host_entries ]; do echo "Consumer waiting 15 seconds for ${item} host name entries..." && sleep 15; done;
-
-        echo "remote consumer file name found: /data/${HN_arr[1]}/remote_${item}_host_entries"
+        while [ ! -f /data/${HN_arr[1]}/remote_${item}_host_entries ]; do echo "Waiting 15 seconds for ${item} host name entries..." && sleep 15; done;
 
         # add the contents of the host names for the consumer and provider into the provider init json
         jq --slurpfile hosts /data/${HN_arr[1]}/remote_${item}_host_entries '.server_config.host_resolution.host_entries |= .+ $hosts' < /data/${HN_arr[1]}/consumerSecondaryInit.json.$((cntr)) > /data/${HN_arr[1]}/consumerSecondaryInit.json.$((cntr+1));
@@ -710,9 +688,7 @@ data:
     do sleep 1; done;
 
     # wait for the provider to come up
-    while [ ! -f /data/${HN_arr[1]}/provider.started ]; do echo "Consumer waiting 15 seconds for the provider to come up..." && sleep 15; done;
-
-    echo "Provider ready. Initializing and starting the service."
+    while [ ! -f /data/${HN_arr[1]}/PROVIDER.started ]; do echo "Waiting 15 seconds for the provider to come up..." && sleep 15; done;
 
     # setup irods and start it
     python3 /var/lib/irods/scripts/setup_irods.py --json_configuration_file /data/${HN_arr[1]}/consumerSecondaryInit.json.$((cntr));
@@ -720,20 +696,25 @@ data:
     # switch to the irods user and start the service
     su - irods -c './irodsctl start -v';
 
-    echo "Startup complete."
+    # generate the startup complete marker
+    touch /data/${HN_arr[1]}/CONSUMERSECONDARY.started
 
     # if the consumer test file script exists run it
     if [ -f /data/${HN_arr[1]}/CONSUMERSECONDARY_test_list.sh ]; then
-      echo "Starting tests...";
+      # substitute the host names into the test command lines in the provider test list
+      sed s/TEST_HOST_NAMES/"${hostname_arr[*]}"/g /data/${HN_arr[1]}/CONSUMERSECONDARY_test_list.sh > /data/${HN_arr[1]}/CONSUMERSECONDARY_test_list.0.sh;
+
+      # make sure this file is executable
+      chmod +x /data/${HN_arr[1]}/CONSUMERSECONDARY_test_list.0.sh;
 
       # go the irods directory, change to the irods user and run the tests
-      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/CONSUMERSECONDARY_test_list.sh >> /data/${HN_arr[1]}/CONSUMERSECONDARY_forensics.log";
-
-      # generate the testing complete marker
-      touch /data/${HN_arr[1]}/CONSUMERSECONDARY_tests.complete
+      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/CONSUMERSECONDARY_test_list.0.sh >> /data/${HN_arr[1]}/CONSUMERSECONDARY_forensics.log";
 
       echo "Testing complete.";
     fi
+
+    # generate the testing complete marker
+    touch /data/${HN_arr[1]}/CONSUMERSECONDARY_tests.complete
 
     until false; do sleep 10000; done;
 
@@ -741,7 +722,7 @@ data:
     #/bin/bash
     apt-get update;
     apt-get -y upgrade;
-    apt-get -y install irods-server jq nano netcat;
+    apt-get -y install irods-server jq netcat;
     apt-get autoclean;
 
     # host names come in the form <name of job>_<id of job>_<pod guid>, ex: consumer_3_wtf2u
@@ -756,8 +737,7 @@ data:
     echo "${REMOTE_HOST_ENTRY}" >> /data/${HN_arr[1]}/remote_CONSUMERTERTIARY_host_entries;
 
     # do not continue until the provider has created it's host entries file
-    while [ ! -f /data/${HN_arr[1]}/remote_PROVIDER_host_entries ]; do echo "Consumer Tertiary waiting for 5 seconds for provider host name entries..." && sleep 5; done;
-    echo "Provider found for CONSUMERTERTIARY: ${PROVIDER_NAME}";
+    while [ ! -f /data/${HN_arr[1]}/remote_PROVIDER_host_entries ]; do echo "Waiting for 5 seconds for provider host name entries..." && sleep 5; done;
 
     # replace the resource, host and provider names in the consumer initialization json
     sed 's/otherResc/'"tertiaryResc-${HN_arr[1]}"'/g' /irods/consumerInit.json > /data/${HN_arr[1]}/consumerTertiaryInit.json.0;
@@ -780,16 +760,10 @@ data:
     # loop through the potential consumers
     for item in "${arr[@]}"
     do
-      echo "The workflow consumer type: ${item} has a value of: ${!item}";
-
-    # if the env param for this service is true (T) add the consumer hostname to the provider config
+      # if the env param for this service is true (T) add the consumer hostname to the provider config
       if [ ${!item}  == "T" ]; then
-        echo "counter is: $((cntr))"
-
         # do not continue until the consumer has created it's host entries file
-        while [ ! -f /data/${HN_arr[1]}/remote_${item}_host_entries ]; do echo "Consumer waiting 15 seconds for ${item} host name entries..." && sleep 15; done;
-
-        echo "remote consumer file name found: /data/${HN_arr[1]}/remote_${item}_host_entries"
+        while [ ! -f /data/${HN_arr[1]}/remote_${item}_host_entries ]; do echo "Waiting 15 seconds for ${item} host name entries..." && sleep 15; done;
 
         # add the contents of the host names for the consumer and provider into the provider init json
         jq --slurpfile hosts /data/${HN_arr[1]}/remote_${item}_host_entries '.server_config.host_resolution.host_entries |= .+ $hosts' < /data/${HN_arr[1]}/consumerTertiaryInit.json.$((cntr)) > /data/${HN_arr[1]}/consumerTertiaryInit.json.$((cntr+1));
@@ -815,9 +789,7 @@ data:
     do sleep 1; done;
 
     # wait for the provider to come up
-    while [ ! -f /data/${HN_arr[1]}/provider.started ]; do echo "Consumer waiting 15 seconds for the provider to come up..." && sleep 15; done;
-
-    echo "Provider ready. Initializing and starting the service."
+    while [ ! -f /data/${HN_arr[1]}/PROVIDER.started ]; do echo "Waiting 15 seconds for the provider to come up..." && sleep 15; done;
 
     # setup irods and start it
     python3 /var/lib/irods/scripts/setup_irods.py --json_configuration_file /data/${HN_arr[1]}/consumerTertiaryInit.json.$((cntr));
@@ -825,20 +797,25 @@ data:
     # switch to the irods user and start the service
     su - irods -c './irodsctl start -v';
 
-    echo "Startup complete."
+    # generate the startup complete marker
+    touch /data/${HN_arr[1]}/CONSUMERTERTIARY.started
 
     # if the consumer test file script exists run it
     if [ -f /data/${HN_arr[1]}/CONSUMERTERTIARY_test_list.sh ]; then
-      echo "Starting tests...";
+      # substitute the host names into the test command lines in the provider test list
+      sed s/TEST_HOST_NAMES/"${hostname_arr[*]}"/g /data/${HN_arr[1]}/CONSUMERTERTIARY_test_list.sh > /data/${HN_arr[1]}/CONSUMERTERTIARY_test_list.0.sh;
+
+      # make sure this file is executable
+      chmod +x /data/${HN_arr[1]}/CONSUMERTERTIARY_test_list.0.sh;
 
       # go the irods directory, change to the irods user and run the tests
-      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/CONSUMERTERTIARY_test_list.sh >> /data/${HN_arr[1]}/CONSUMERTERTIARY_forensics.log";
-
-      # generate the testing complete marker
-      touch /data/${HN_arr[1]}/CONSUMERTERTIARY_tests.complete
+      cd /var/lib/irods && sudo -u irods -H bash -c "/data/${HN_arr[1]}/CONSUMERTERTIARY_test_list.0.sh >> /data/${HN_arr[1]}/CONSUMERTERTIARY_forensics.log";
 
       echo "Testing complete.";
     fi
+
+    # generate the testing complete marker
+    touch /data/${HN_arr[1]}/CONSUMERTERTIARY_tests.complete
 
     until false; do sleep 10000; done;
 
