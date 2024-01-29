@@ -20,7 +20,7 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-cpu_limits: true
+cpu_limits: false
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -80,7 +80,6 @@ base_config:
 
 resources:
   limits:
-    cpu: 250m
     ephemeral-storage: 64Mi
     memory: 500Mi
   requests:

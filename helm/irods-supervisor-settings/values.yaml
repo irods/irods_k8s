@@ -90,7 +90,6 @@ volumes:
 
 resources:
   limits:
-    cpu: 250m
     memory: 200Mi
   requests:
     cpu: 100m

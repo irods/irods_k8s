@@ -77,11 +77,11 @@ resources:
   limits:
     memory: 512Mi
     ephemeral-storage: 64Mi
-    cpu: 1000m
+
   requests:
     memory: 256Mi
     ephemeral-storage: 50Mi
-    cpu: 1000m
+    cpu: 500m
 
 nodeSelector: {}
 
