@@ -1,2 +1,3 @@
 irods*.yaml filter=git-crypt diff=git-crypt
 test*.yaml filter=git-crypt diff=git-crypt
+base*.yaml filter=git-crypt diff=git-crypt
