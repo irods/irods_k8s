@@ -77,6 +77,9 @@ base_config:
   poll_short_sleep: "10"
   poll_long_sleep: "60"
   max_no_activity_count: "60"
+  nfs_server: "servername"
+  nfs_path: "/some_path"
+  nfs_mount: "/some_mount"
 
 resources:
   limits:
