@@ -1,10 +1,8 @@
 #!/bin/sh
 
-# SPDX-FileCopyrightText: 2024 Renaissance Computing Institute. All rights reserved.
+# BSD 3-Clause License All rights reserved.
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
-# SPDX-License-Identifier: LicenseRef-RENCI
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: BSD 3-Clause License
 
 (
 sleep 60 ; \
