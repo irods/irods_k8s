@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2024 Renaissance Computing Institute. All rights reserved.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: LicenseRef-RENCI
+# SPDX-License-Identifier: MIT
+
 # adapted from:
 # http://mpas.github.io/post/2015/06/11/20150611_docker-rabbitmq-default-users/
 
