@@ -1,6 +1,6 @@
-# BSD 3-Clause License All rights reserved.
+# BSD 3-Clause All rights reserved.
 #
-# SPDX-License-Identifier: BSD 3-Clause License
+# SPDX-License-Identifier: BSD 3-Clause
 
 # adapted from:
 # http://mpas.github.io/post/2015/06/11/20150611_docker-rabbitmq-default-users/

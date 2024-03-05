@@ -1,6 +1,6 @@
-{{/*BSD 3-Clause License All rights reserved.*/}}
+{{/*BSD 3-Clause All rights reserved.*/}}
 
-{{/*SPDX-License-Identifier: BSD 3-Clause License*/}}
+{{/*SPDX-License-Identifier: BSD 3-Clause*/}}
 
 1. Get the application URL by running these commands:
 {{- if contains "NodePort" .Values.service.type }}
