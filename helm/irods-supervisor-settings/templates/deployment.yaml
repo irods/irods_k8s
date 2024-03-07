@@ -79,6 +79,9 @@ spec:
           - name: JWT_SECRET
             value: {{ .Values.jwtSecurity.jwtSecret }}
 
+          - name: BATCH_SIZE
+            value: {{ .Values.jobBatchSize }}
+
           volumeMounts:
             - name:  {{ .Values.volumes.name }}
               mountPath: {{ .Values.volumes.mountPath }}

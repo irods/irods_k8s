@@ -18,6 +18,8 @@ fullnameOverride: ""
 
 isAWS: false
 
+jobBatchSize: 25
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: false
