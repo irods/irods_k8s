@@ -18,6 +18,12 @@ fullnameOverride: ""
 
 isAWS: false
 
+env:
+  scriptMountPath: /someDir
+  scriptName: ".someScript"
+  dataURL: 'http://someurl'
+  token: 'someToken'
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: false

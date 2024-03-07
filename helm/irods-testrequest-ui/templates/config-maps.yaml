@@ -1,0 +1,14 @@
+# BSD 3-Clause All rights reserved.
+#
+# SPDX-License-Identifier: BSD 3-Clause
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{- include "irods-testrequest-ui.fullname" . }}-scripts"
+data:
+  env: |-
+    REACT_APP_BASE_DATA_URL='{{ .Values.env.dataURL }}'
+    REACT_APP_WATCH_REFRESH_TIMEOUT=10000
+    REACT_APP_SETTINGS_DATA_TOKEN='{{ .Values.env.token }}'
