@@ -26,19 +26,23 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "npm", "run", "start"]
           env:
           - name: SYSTEM
             value: {{ .Values.system }}
+          - name: REACT_APP_BASE_DATA_URL
+            value: {{ .Values.env.dataURL }}
+          - name: REACT_APP_WATCH_REFRESH_TIMEOUT
+            value: {{ .Values.env.timeout | quote }}
+          - name: REACT_APP_SETTINGS_DATA_TOKEN
+            value: {{ .Values.env.token }}
+
           ports:
             - name: http
               containerPort: {{ .Values.service.target_port }}
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          volumeMounts:
-          - name: env-script
-            mountPath: {{ .Values.env.scriptMountPath }}
-            subPath: {{ .Values.env.scriptName | quote }}
     {{- with .Values.nodeSelector}}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -51,8 +55,3 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-      volumes:
-        - name: env-script
-          configMap:
-            name: "{{- include "irods-testrequest-ui.fullname" . }}-scripts"
-            defaultMode: 0777

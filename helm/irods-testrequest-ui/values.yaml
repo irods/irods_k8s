@@ -19,10 +19,9 @@ fullnameOverride: ""
 isAWS: false
 
 env:
-  scriptMountPath: /someDir
-  scriptName: ".someScript"
   dataURL: 'http://someurl'
   token: 'someToken'
+  timeout: "10000"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -48,7 +47,7 @@ service:
   type: ClusterIP
   http: 80
   https: 443
-  target_port: 80
+  target_port: 3000
 
 ingress:
   enabled: true
@@ -83,7 +82,8 @@ database:
 
 resources:
   limits:
-    memory: 200Mi
+    cpu: 1000m
+    memory: 1Gi
   requests:
     cpu: 100m
     memory: 64Mi
