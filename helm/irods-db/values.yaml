@@ -42,10 +42,12 @@ service:
 
 resources:
    limits:
-     memory: 512Mi
+     ephemeral-storage:
+     cpu: 150m
+     memory: 150Mi
    requests:
-     cpu: 250m
-     memory: 128Mi
+     cpu: 100m
+     memory: 64Mi
 
 autoscaling:
   enabled: false
