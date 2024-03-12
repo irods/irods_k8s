@@ -82,10 +82,12 @@ database:
 
 resources:
   limits:
+    ephemeral-storage: 128Mi
     cpu: 1000m
-    memory: 1Gi
+    memory: 512Mi
   requests:
-    cpu: 100m
+    ephemeral-storage: 50Mi
+    cpu: 512m
     memory: 64Mi
 
 nodeSelector: {}
