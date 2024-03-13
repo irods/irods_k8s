@@ -18,7 +18,7 @@ EXPOSE 5672
 RUN chmod +x /init.sh
 
 # create a new non-root user
-RUN useradd -M -u 1000 nru
+RUN useradd -M -u 999 nru
 
 # switch to the non-root user
 USER nru
