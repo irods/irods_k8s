@@ -114,9 +114,9 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
       volumes:
         - name: {{ .Values.volumes.name }}
           persistentVolumeClaim:
