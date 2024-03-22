@@ -4,21 +4,17 @@ BSD 3-Clause All rights reserved.
 SPDX-License-Identifier: BSD 3-Clause
 -->
 
-<!--
-
--->
-
 # iRODS Testing Environment (v9) - The Kubernetes Edition
 
 ## Design Goals - Primary
- - Speed up test runs - probably via running existing tests on ‘more’ machines in parallel
+ - Speed up test runs by running existing iRODS tests on ‘more’ machines in parallel
  - iRODS Development team gets ‘hands-free’ testing upon request / automatically
  - Team visibility of ongoing testing / progress
 
 ## Design Goals - Secondary
  - GitHub Action integration for per pull-request / merge test runs
  - External visibility of ongoing testing / progress
- - Automated builds in k8s
+ - Automated builds in GitHub
 
 ## Current Vision
  - Use existing iRODS python test suites
