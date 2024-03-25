@@ -14,7 +14,9 @@ Deployment values need to be updated to support your intended use and/or environ
 Also note that you will need to synchronize your Supervisor DB service name with this deployment.
 
 ### JWT tokens
-This site uses JWT tokens to add a layer of access obfuscation. These tokens are used in this FASTAPI application as well as the iRODS Test request applications.
+This site uses JWT tokens to add a layer of access obfuscation. 
+
+These tokens are used in this FASTAPI and the iRODS Test request applications.
 
 Please see the notes in the "config" directory above (JWT-token-creation.txt) on how to create JWT tokens. 
 
