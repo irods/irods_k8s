@@ -9,6 +9,10 @@ This set of deployment scripts creates an irods test request app. Please see the
 
 Deployment values need to be updated to support your intended use and/or environment.
 
-Example helm commands
-helm -n irods-dev upgrade --install test-request-ui-dev ./irods-testrequest-ui/
-helm -n irods-dev delete test-request-ui-dev
+Also note you will need to synchronize this deployment with the URL of the Supervisor settings web service hostname.
+
+### Example helm commands for creating or removing this deployment
+
+helm -n <**k8s namespace**> upgrade --install test-request-ui-dev ./irods-testrequest-ui/
+
+helm -n <**k8s namespace**> delete test-request-ui-dev

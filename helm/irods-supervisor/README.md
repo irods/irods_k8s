@@ -9,6 +9,10 @@ This set of deployment scripts creates an irods job supervisor. Please see the G
 
 Deployment values need to be updated to support your intended use and/or environment. 
 
-Example helm commands
-helm -n irods-dev upgrade --install supervisor-dev ./irods-supervisor/
-helm -n irods-dev delete supervisor-dev
+Also note that you will need to synchronize your Supervisor DB service name with this deployment.
+
+### Example helm commands for creating or removing this deployment
+
+helm -n <**k8s namespace**> upgrade --install supervisor ./irods-supervisor/
+
+helm -n <**k8s namespace**> supervisor-dev

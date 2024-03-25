@@ -7,12 +7,22 @@ SPDX-License-Identifier: BSD 3-Clause
 # iRODS-Service
 Creates an irods consumer or provider for testing purposes only
 
-The helm values file needs to be updated to support your intended use. Note that the DB deployment name must be updated to match 
-that deployment.
+Deployment values need to be updated to support your intended use and/or environment. 
 
-Example helm commands
-helm -n irods-dev upgrade --install --set image.os="ubuntu" --set image.os_version="20.04" -f ./irods-service/irods-provider-values.yaml provider-ubuntu-20-04 ./irods-service/
-helm -n irods-dev upgrade --install --set image.os="ubuntu" --set image.os_version="20.04" -f ./irods-service/irods-consumer-values.yaml consumer-ubuntu-20-04 ./irods-service/
+Also note that you will need to synchronize your irods DB service name with this deployment.
 
-helm -n irods-dev delete provider-ubuntu-20-04
-helm -n irods-dev delete consumer-ubuntu-20-04
+### Example helm commands for creating or removing this deployment
+
+helm -n <**k8s namespace**> upgrade \
+--install \
+--set image.os="ubuntu" \
+--set image.os_version="20.04" provider-ubuntu-20-04 ./irods-service/
+
+helm -n <**k8s namespace**> upgrade \
+--install \
+--set image.os="ubuntu" \
+--set image.os_version="20.04" consumer-ubuntu-20-04 ./irods-service/
+
+helm -n <**k8s namespace**> delete provider-ubuntu-20-04
+
+helm -n <**k8s namespace**> delete consumer-ubuntu-20-04
