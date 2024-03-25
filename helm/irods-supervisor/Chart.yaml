@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD 3-Clause
 
 apiVersion: v2
-name: irods-supervisor
+name: irods-supervisor-db
 description: A Helm chart for Kubernetes
 
 # A chart can be either an 'application' or a 'library' chart.

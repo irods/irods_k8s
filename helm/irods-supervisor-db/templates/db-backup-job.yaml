@@ -7,9 +7,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "irods-db.fullname" . }}-backup-job
+  name: {{ include "irods-supervisor-db.fullname" . }}-backup-job
   labels:
-    {{- include "irods-db.labels" . | nindent 4 }}
+    {{- include "irods-supervisor-db.labels" . | nindent 4 }}
 spec:
   schedule: "{{ .Values.backup.crontab }}"
   jobTemplate:
@@ -55,7 +55,7 @@ spec:
                 claimName: {{ .Values.dataVolumes.claimName }}
             - name: backup-script
               configMap:
-                name: "{{- include "irods-db.fullname" . }}-scripts"
+                name: "{{- include "irods-supervisor-db.fullname" . }}-scripts"
                 defaultMode: 0777
           securityContext:
             {{- toYaml .Values.backupSecurityContext | nindent 12 }}

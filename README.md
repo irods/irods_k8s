@@ -19,3 +19,5 @@ A repo for the Kubernetes/Helm deployment scripts and charts.
 
 ## Description
 This is a repository for the Kubernetes/Helm deployment scripts and charts for the iRODS Test components.
+
+This is a list of the Helm deployments. Note that there is a README.md in each directory that explains how the component is installed.

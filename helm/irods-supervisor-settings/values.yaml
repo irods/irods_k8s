@@ -9,37 +9,23 @@
 replicaCount: 1
 
 image:
-  repository: containers.renci.org/eds/irods-settings:v0.0.10
+  repository: containers.renci.org/irods/irods-settings:latest
   pullPolicy: Always
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-isAWS: false
+system: 'dev'
 
-jobShortBatchSize: 10
-jobLongBatchSize: 2
+log_backup_path: "/somedir/log-backups"
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: false
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name:
+serviceAccount: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 999
+podSecurityContext:
+  runAsUser: 999
+  fsGroup: 999
+  runAsGroup: 999
 
 service:
   type: ClusterIP
@@ -48,7 +34,9 @@ service:
   target_port: 4000
 
 ingress:
-  enabled: true
+  enabled: false
+  host: somehost
+  pathType: "ImplementationSpecific"
   class: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "86400"
@@ -58,35 +46,51 @@ ingress:
     nginx.ingress.kubernetes.io/service-upstream: 'true'
     nginx.ingress.kubernetes.io/upstream-keepalive-timeout: "86400"
     nginx.ingress.kubernetes.io/proxy-body-size: "256m"
-  host: somehost
-  pathType: "ImplementationSpecific"
+  endpoints:
+    - /openapi.json
+    - /docs
+    - /get_job_order
+    - /reset_job_order
+    - /get_job_defs
+    - /get_log_file_list
+    - /get_log_file/
+    - /get_run_list
+    - /image_repo
+    - /workflow_type_name
+    - /get_sv_component_versions
+    - /get_run_properties
+    - /superv_workflow_request
+    - /get_environment_type_names
+    - /get_test_names
+    - /get_dbms_image_names
+    - /get_os_image_names
+    - /get_run_status
+    - /get_test_request_names
   tls:
     enabled: false
 
-database:
-  db_name_index: index_1
-  db_host_index: index_2
-  db_port_index: index_3
-  db_username_index: index_4
-  db_password_index: index_5
-
-  db_name: val_1
-  db_host: val_2
-  db_port: val_3
-  db_username: val_4
-  db_password: val_5
-
-  store_name: store_name
-
 volumes:
-  name: pvc-name
-  claimName: pvc-claim-name
   create: false
-  accessMode: "ReadWriteOnce"
-  storageClass: "storage class"
-  size: 1Gi
-  efsHandle: "the handle"
-  temp_dir: /some_temp_dir
+  name: irods-data-vol
+  claimName: some-pvc
+  accessMode: "ReadWriteMany"
+  size: 30Gi
+  temp_dir: /somedir/tmp
+  mountPath: /somedir
+
+jwtSecurity:
+  bearerName: ""
+  bearerSecret: ""
+  jwtAlgorithm: ""
+  jwtSecret: ""
+  jwtToken: ""
+
+urls:
+  prd: "https://<your hostname>"
+  dev: "https://<your hostname>"
+
+bearerTokens:
+  dev: ""
 
 resources:
   limits:
@@ -96,6 +100,8 @@ resources:
   requests:
     cpu: 100m
     memory: 64Mi
+
+securityContext: {}
 
 nodeSelector: {}
 

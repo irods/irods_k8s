@@ -2,45 +2,53 @@
 #
 # SPDX-License-Identifier: BSD 3-Clause
 
-# Default values for irods-db.
+# Default values for irods-supervisor-db.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 image:
-  repository: some-repo
+  repository: ""
   pullPolicy: IfNotPresent
-  tag: "0.0.0"
+  tag: ""
 
 imagePullSecrets: []
-nameOverride: "test"
+nameOverride: ""
 fullnameOverride: ""
+serviceAccount: {}
 podAnnotations: {}
-podSecurityContext: {}
-securityContext: {}
 nodeSelector: {}
 tolerations: []
 affinity: {}
-serviceAccount:
-  create: false
-  annotations: {}
-  name:
 
 storage:
-  name: db-vol
   create: true
+  name: irods-postgres-db-vol
   size: 1Gi
   accessMode: "ReadWriteMany"
   dataMountPath: /var/lib/postgresql/data
-  # mysql data mount path
-  #   dataMountPath: /var/lib/mysql
+
+podSecurityContext:
+  fsGroup: 999
+
+securityContext:
+  runAsUser: 999
+  runAsNonRoot: true
 
 service:
   name: service-port
   type: ClusterIP
   protocol: TCP
   port: 5432
+
+resources:
+   limits:
+     cpu: 150m
+     memory: 150Mi
+   requests:
+     cpu: 100m
+     memory: 64Mi
 
 autoscaling:
   enabled: false
@@ -50,38 +58,31 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 80
 
 initDB:
-  irods_mysql: false
-  irods_postgres: true
-  user: "irods"
-  password: "testpassword"
-  initScript: "init-irods-pg-db.sh"
-# mysql script name
-#  initScript: "init-irods-mysql-db.sh"
+  superv: true
+  user: "superv"
+  password: "somepassword"
 
-# postgres env params
 envParams:
   param1:
     envParamName: "POSTGRES_USER"
     envParamValue: "postgres"
   param2:
     envParamName: "POSTGRES_PASSWORD"
-    envParamValue: "testpassword"
+    envParamValue: "somepassword"
   param3:
     envParamName: "PGDATA"
     envParamValue: "/var/lib/postgresql/data/db_data"
 
-# mysql env params
-#envParams:
-#  param1:
-#    envParamName: "MYSQL_USER"
-#    envParamValue: "irods"
-#  param2:
-#    envParamName: "MYSQL_ROOT_PASSWORD"
-#    envParamValue: "testpassword"
-#  param3:
-#    envParamName: "MYSQL_PASSWORD"
-#    envParamValue: "testpassword"
-
 dataVolumes:
   name: data-vol
-  claimName: irods-pvc
+  claimName: some-pvc
+
+backupImage:
+  repository: containers.renci.org/irods/db-backup-job
+  tag: "latest"
+  pullPolicy: Always
+
+backup:
+  enable: false
+  restoreDB: false
+  crontab: "0 5 * * *"

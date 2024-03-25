@@ -9,14 +9,12 @@
 replicaCount: 1
 
 image:
-  repository: containers.renci.org/eds/irods-testrequest-ui:latest
+  repository: containers.renci.org/irods/irods-testrequest-ui:latest
   pullPolicy: Always
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
-isAWS: false
 
 env:
   dataURL: 'http://someurl'
@@ -32,16 +30,12 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  runAsUser: 999
+  fsGroup: 999
+  runAsGroup: 999
 
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 999
 
 service:
   type: ClusterIP
@@ -51,6 +45,8 @@ service:
 
 ingress:
   enabled: true
+  host: somehost
+  pathType: "ImplementationSpecific"
   class: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "86400"
@@ -60,25 +56,10 @@ ingress:
     nginx.ingress.kubernetes.io/service-upstream: 'true'
     nginx.ingress.kubernetes.io/upstream-keepalive-timeout: "86400"
     nginx.ingress.kubernetes.io/proxy-body-size: "256m"
-  host: somehost
-  pathType: "ImplementationSpecific"
+  endpoints:
+    - /
   tls:
     enabled: false
-
-database:
-  db_name_index: index_1
-  db_host_index: index_2
-  db_port_index: index_3
-  db_username_index: index_4
-  db_password_index: index_5
-
-  db_name: val_1
-  db_host: val_2
-  db_port: val_3
-  db_username: val_4
-  db_password: val_5
-
-  store_name: store_name
 
 resources:
   limits:

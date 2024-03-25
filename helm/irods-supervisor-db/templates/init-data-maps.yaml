@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{- include "irods-supervisor-db.fullname" . }}-init-scripts"
+data:
+  {{- if .Values.initDB.superv}}
+  001-init-superv-db.sh: |-
+    #!/bin/sh
+    set -e
+
+    # Check to see if the apsviz_gauge DB and user exist. if not create them
+    psql -v ON_ERROR_STOP=1 --username "{{ .Values.envParams.param1.envParamValue }}" <<-EOSQL
+          CREATE DATABASE "irods_superv" WITH OWNER = postgres TABLESPACE = pg_default CONNECTION LIMIT = -1 IS_TEMPLATE = False;
+          CREATE ROLE "{{ .Values.initDB.user }}" WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT NOREPLICATION CONNECTION LIMIT -1 PASSWORD '{{ .Values.initDB.password }}';
+          GRANT ALL PRIVILEGES ON DATABASE "irods_superv" TO "superv";
+    EOSQL
+
+  002-load-superv-schema.sh: |-
+    #!/bin/sh
+    set -e
+
+    # created by:
+    # pg_dump --schema-only -U postgres -W irods_superv >> load-superv-schema.sql
+
+    psql -d irods_superv -U postgres < /docker-entrypoint-initdb.d/load-superv-schema.sql
+
+  003-load-superv-data.sh: |-
+    #!/bin/sh
+    set -e
+
+    # created by:
+    # pg_dump --inserts --data-only -h superv-db -d irods_superv -U postgres -W \
+    # -t supervisor_job_location_lu \
+    # -t supervisor_job_type_lu \
+    # -t supervisor_config \
+    # -t test_name_lu \
+    # -t os_image_name_lu \
+    # -t dbms_image_name_lu > load-superv-data.sql
+
+    psql -d irods_superv -U postgres < /docker-entrypoint-initdb.d/load-superv-data.sql
+
+  load-superv-schema.sql: |-
+    {{ .Files.Get "config-data/load-superv-schema.sql" | nindent 4 }}
+
+  load-superv-data.sql: |-
+    {{ .Files.Get "config-data/load-superv-data.sql" | nindent 4 }}
+  {{- end }}

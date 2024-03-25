@@ -1,0 +1,113 @@
+# BSD 3-Clause All rights reserved.
+#
+# SPDX-License-Identifier: BSD 3-Clause
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "irods-supervisor-db.fullname" . }}
+  labels:
+    {{- include "irods-supervisor-db.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "irods-supervisor-db.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "irods-supervisor-db.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "irods-supervisor-db.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- range $key, $value := .Values.envParams }}
+          - name: {{ $value.envParamName }}
+            value: {{ $value.envParamValue }}
+          {{- end }}
+          ports:
+            - name: {{ .Values.service.name }}
+              containerPort: {{ .Values.service.port }}
+              protocol: {{ .Values.service.protocol }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: {{ .Values.storage.name }}
+            mountPath: {{ .Values.storage.dataMountPath }}
+
+          {{- if .Values.initDB }}
+          - name: init-superv-db-script
+            mountPath: /docker-entrypoint-initdb.d/001-init-superv-db.sh
+            subPath: "001-init-superv-db.sh"
+          - name: load-superv-schema-script
+            mountPath: /docker-entrypoint-initdb.d/002-load-superv-schema.sh
+            subPath: "002-load-superv-schema.sh"
+          - name: load-superv-data-script
+            mountPath: /docker-entrypoint-initdb.d/003-load-superv-data.sh
+            subPath: "003-load-superv-data.sh"
+
+          - name: load-superv-data-sql
+            mountPath: /docker-entrypoint-initdb.d/load-superv-schema.sql
+            subPath: "load-superv-schema.sql"
+          - name: load-superv-data-sql
+            mountPath: /docker-entrypoint-initdb.d/load-superv-data.sql
+            subPath: "load-superv-data.sql"
+          {{- end }}
+      volumes:
+      - name: {{ .Values.storage.name }}
+        persistentVolumeClaim:
+          claimName: {{ include "irods-supervisor-db.fullname" . }}-pvc
+
+      {{- if .Values.initDB }}
+      - name: init-superv-db-script
+        configMap:
+          name: "{{- include "irods-supervisor-db.fullname" . }}-init-scripts"
+          defaultMode: 0777
+      - name: load-superv-schema-script
+        configMap:
+          name: "{{- include "irods-supervisor-db.fullname" . }}-init-scripts"
+          defaultMode: 0777
+      - name: load-superv-data-script
+        configMap:
+          name: "{{- include "irods-supervisor-db.fullname" . }}-init-scripts"
+          defaultMode: 0777
+
+      - name: load-superv-schema-sql
+        configMap:
+          name: "{{- include "irods-supervisor-db.fullname" . }}-init-scripts"
+          defaultMode: 0777
+      - name: load-superv-data-sql
+        configMap:
+          name: "{{- include "irods-supervisor-db.fullname" . }}-init-scripts"
+          defaultMode: 0777
+      {{- end}}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

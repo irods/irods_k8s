@@ -1,0 +1,29 @@
+Create JWT tokens for the settings FASTAPI.
+
+ref: https://testdriven.io/blog/fastapi-jwt-auth/
+
+-------------------
+Create a new JWT secret for encoding/decoding JWT strings:
+  - Open a python terminal
+  - Run the following commands
+-------------------
+
+import os
+import binascii
+binascii.hexlify(os.urandom(24))
+
+-------------------
+Similarly, create a new bearer secret
+  - Open a python terminal
+  - Run the following commands
+-------------------
+
+import os
+import binascii
+binascii.hexlify(os.urandom(24))
+
+-------------------
+Use the tester to create a token
+-------------------------
+ - Add in the 4 environment params: BEARER_NAME=<>;BEARER_SECRET=<>;JWT_ALGORITHM=HS256;JWT_SECRET=<>
+ - Run the test_sign_jwt() test and collect the JWT token

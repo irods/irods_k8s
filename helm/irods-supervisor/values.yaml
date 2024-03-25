@@ -13,6 +13,8 @@ image:
   tag: "latest"
   pullPolicy: Always
 
+system: 'Dev'
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
@@ -26,43 +28,25 @@ serviceAccount:
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name:
+  name:  irods-job-account
 
 volumes:
   create: false
-  name: pvc-name
-  claimName: pvc-claim-name
-  storageClass: "someclass"
-  size: 1Gi
+  name: irods-data-vol
+  claimName: irods-pvc
+  accessMode: "ReadWriteMany"
+  size: 20Gi
+  temp_dir: /data/tmp
+  mountPath: /data
 
-podSecurityContext: {}
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 999
-
-service:
-  type: ClusterIP
-  port: 80
-
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-  hosts:
-    - host: ""
-      paths:
-        - path: /
-          pathType: ""
-  tls: []
+podSecurityContext:
+  runAsUser: 999
+  fsGroup: 999
+  runAsGroup: 999
 
 base_config:
-  cluster: "clustername"
-  namespace: "namespace"
+  cluster: "k8s_clustername"
+  namespace: "k8s_namespace"
   data_pvc_claim: "data_pvc_claim"
   filesvr_pvc_claim: "filesvr_pvc_claim"
   secrets_claim: "secrets-claim"
@@ -93,3 +77,5 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+securityContext: {}

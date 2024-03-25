@@ -7,12 +7,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{- include "irods-db.fullname" . }}-postgres-job"
+  name: "{{- include "irods-supervisor-db.fullname" . }}-postgres-job"
 spec:
   ttlSecondsAfterFinished: 0
   template:
     metadata:
-      name: "{{- include "irods-db.fullname" . }}-postgres-job"
+      name: "{{- include "irods-supervisor-db.fullname" . }}-postgres-job"
     spec:
       containers:
       - name: loader-container
@@ -22,7 +22,7 @@ spec:
         - /loaddb.sh
         env:
         - name: PGHOST
-          value: {{ include "irods-db.fullname" . }}
+          value: {{ include "irods-supervisor-db.fullname" . }}
         - name: PGUSER
           value: {{ .Values.envParams.param1.envParamValue }}
         - name: PGPASSWORD
@@ -45,6 +45,6 @@ spec:
           claimName: {{ .Values.dataVolumes.claimName }}
       - name: loader-script
         configMap:
-          name: "{{- include "irods-db.fullname" . }}-scripts"
+          name: "{{- include "irods-supervisor-db.fullname" . }}-scripts"
           defaultMode: 0777
 {{ end }}
