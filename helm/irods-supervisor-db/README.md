@@ -9,7 +9,7 @@ This set of deployment scripts creates an irods job supervisor settings web serv
 
 Deployment values need to be updated to support your intended use and/or environment. 
 
-Also note that you will need to synchronize other deployments with this databases service name used in this deployment.
+Also note that you will need to synchronize other deployments with this database's service name used in this deployment.
 
 ### Example helm commands for creating or removing this deployment
 
