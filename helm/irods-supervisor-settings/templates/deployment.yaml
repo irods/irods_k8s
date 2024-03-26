@@ -87,6 +87,10 @@ spec:
           volumeMounts:
             - name:  {{ .Values.volumes.name }}
               mountPath: {{ .Values.volumes.mountPath }}
+            - name: nfs-vol
+              mountPath: {{ .Values.volumes.nfsMountPath }}
+              readOnly: true
+
           command:
             - 'uvicorn'
           args:
@@ -123,6 +127,10 @@ spec:
         - name: {{ .Values.volumes.name }}
           persistentVolumeClaim:
             claimName: {{ .Values.volumes.claimName }}
+        - name: nfs-vol
+          nfs:
+            server: {{ .Values.volumes.nfsServer }}
+            path: {{ .Values.volumes.irodsPackageDir }}
     {{- with .Values.nodeSelector}}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
