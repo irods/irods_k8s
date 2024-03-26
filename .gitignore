@@ -4,3 +4,4 @@
 
 irods-git-crypt-key
 /helm/deploy/
+/helm/test_all/
