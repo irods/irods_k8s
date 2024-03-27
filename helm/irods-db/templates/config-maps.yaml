@@ -32,6 +32,6 @@ data:
     # helpful cli to determine startup was successful
     # mysql> SELECT user FROM mysql.user;
     # mysql> show databases;
-    mysql -uroot -p{{ .Values.envParams.param2.envParamValue }} -e "CREATE DATABASE ICAT; CREATE USER '{{ .Values.initDB.user }}'@'localhost'; GRANT ALL ON ICAT.* to '{{ .Values.initDB.user }}'@'localhost';"
+    mysql -uroot -p {{ .Values.envParams.param2.envParamValue }} -e "CREATE DATABASE ICAT; CREATE USER '{{ .Values.initDB.user }}'@'localhost'; GRANT ALL ON ICAT.* to '{{ .Values.initDB.user }}'@'localhost';"
   {{ end }}
 {{ end }}
