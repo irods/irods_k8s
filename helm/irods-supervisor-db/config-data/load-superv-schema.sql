@@ -470,11 +470,13 @@ BEGIN
                            FROM public.supervisor_request
                            where (status = 'new' or status = 'debug'))
                  GROUP BY id
-                 ORDER BY id ASC) runs;
+                 ORDER BY id) runs;
 END;
 $$;
 
 alter function get_supervisor_request_items_json() owner to postgres;
+
+grant execute on function get_supervisor_request_items_json() to superv;
 
 create function get_run_status_json(_request_group text DEFAULT NULL::text)
     returns TABLE(document json)
@@ -486,20 +488,29 @@ BEGIN
 	RETURN QUERY
 
 	-- get the test type names
-    SELECT json_build_object('Request name', _request_group,
-                             'Jobs', json_agg(json_build_object('ID', d.id, 'Status', d.status, 'Results', d.results)))
+    SELECT json_build_object(
+        'Request name', _request_group,
+        'Testing Jobs', json_build_object('Total', (SElECT count(d.id)), 'Complete',
+            (
+                SELECT count(id)
+                FROM supervisor_request
+                WHERE request_group = _request_group AND results IS NOT NULL
+            )),
+        'Jobs', json_agg(json_build_object('ID', d.id, 'Status', d.status, 'Results', d.results)))
     FROM
-        (
-            SELECT id, status, results
-            FROM supervisor_request
-            WHERE request_group = _request_group
-            ORDER BY id
-        ) d;
+    (
+        SELECT id, status, results
+        FROM supervisor_request
+        WHERE request_group = _request_group
+        ORDER BY id
+    ) d;
 
-END
+END;
 $$;
 
 alter function get_run_status_json(text) owner to postgres;
+
+grant execute on function get_run_status_json(text) to superv;
 
 create function get_test_request_names_json()
     returns TABLE(x jsonb)
