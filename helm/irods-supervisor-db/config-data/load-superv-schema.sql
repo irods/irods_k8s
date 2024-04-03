@@ -8,7 +8,7 @@ create sequence dbms_name_lu_id_seq
 
 alter sequence dbms_name_lu_id_seq owner to superv;
 
-create table supervisor_request
+create table if not exists supervisor_request
 (
     id            serial
         primary key,
@@ -21,7 +21,7 @@ create table supervisor_request
 alter table supervisor_request
     owner to superv;
 
-create table supervisor_job_location_lu
+create table if not exists supervisor_job_location_lu
 (
     id          serial
         primary key,
@@ -32,7 +32,7 @@ create table supervisor_job_location_lu
 alter table supervisor_job_location_lu
     owner to superv;
 
-create table supervisor_job_type_lu
+create table if not exists supervisor_job_type_lu
 (
     id          serial
         primary key,
@@ -43,7 +43,7 @@ create table supervisor_job_type_lu
 alter table supervisor_job_type_lu
     owner to superv;
 
-create table supervisor_config
+create table if not exists supervisor_config
 (
     id                  serial
         primary key,
@@ -83,16 +83,16 @@ create table supervisor_config
 alter table supervisor_config
     owner to superv;
 
-create index supervisor_config_job_location_id_95f4124c
+create index if not exists supervisor_config_job_location_id_95f4124c
     on supervisor_config (job_location_id);
 
-create index supervisor_config_job_type_id_c133e5ae
+create index if not exists supervisor_config_job_type_id_c133e5ae
     on supervisor_config (job_type_id);
 
-create index supervisor_config_next_job_type_id_a950224a
+create index if not exists supervisor_config_next_job_type_id_a950224a
     on supervisor_config (next_job_type_id);
 
-create table test_name_lu
+create table if not exists test_name_lu
 (
     id          serial
         primary key,
@@ -103,7 +103,7 @@ create table test_name_lu
 alter table test_name_lu
     owner to superv;
 
-create table os_image_name_lu
+create table if not exists os_image_name_lu
 (
     id          integer default nextval('os_name_lu_id_seq'::regclass) not null
         constraint os_name_lu_pkey
@@ -117,7 +117,7 @@ alter table os_image_name_lu
 
 alter sequence os_name_lu_id_seq owned by os_image_name_lu.id;
 
-create table dbms_image_name_lu
+create table if not exists dbms_image_name_lu
 (
     id          integer default nextval('dbms_name_lu_id_seq'::regclass) not null
         constraint dbms_name_lu_pkey
@@ -131,7 +131,7 @@ alter table dbms_image_name_lu
 
 alter sequence dbms_name_lu_id_seq owned by dbms_image_name_lu.id;
 
-create function get_supervisor_job_defs_json()
+create or replace function get_supervisor_job_defs_json()
     returns TABLE(x jsonb)
     language plpgsql
 as
@@ -185,7 +185,7 @@ alter function get_supervisor_job_defs_json() owner to postgres;
 
 grant execute on function get_supervisor_job_defs_json() to superv;
 
-create function get_supervisor_job_order(_type text DEFAULT 'ASGS'::text)
+create or replace function get_supervisor_job_order(_type text DEFAULT 'ASGS'::text)
     returns TABLE(x jsonb)
     language plpgsql
 as
@@ -223,7 +223,7 @@ alter function get_supervisor_job_order(text) owner to postgres;
 
 grant execute on function get_supervisor_job_order(text) to superv;
 
-create function get_supervisor_run_list()
+create or replace function get_supervisor_run_list()
     returns TABLE(x jsonb)
     language plpgsql
 as
@@ -246,7 +246,7 @@ alter function get_supervisor_run_list() owner to postgres;
 
 grant execute on function get_supervisor_run_list() to superv;
 
-create function update_next_job_for_job(_job_name text, _next_job_type_id integer, _type text DEFAULT 'ASGS'::text) returns integer
+create or replace function update_next_job_for_job(_job_name text, _next_job_type_id integer, _type text DEFAULT 'ASGS'::text) returns integer
     language plpgsql
 as
 $$
@@ -263,7 +263,7 @@ alter function update_next_job_for_job(text, integer, text) owner to postgres;
 
 grant execute on function update_next_job_for_job(text, integer, text) to superv;
 
-create function update_next_job_for_job(_job_id integer, _next_job_type_id integer, _type text DEFAULT 'CORE'::text) returns integer
+create or replace function update_next_job_for_job(_job_id integer, _next_job_type_id integer, _type text DEFAULT 'CORE'::text) returns integer
     language plpgsql
 as
 $$
@@ -280,7 +280,7 @@ alter function update_next_job_for_job(integer, integer, text) owner to postgres
 
 grant execute on function update_next_job_for_job(integer, integer, text) to superv;
 
-create function update_job_image(_job_name text, _image text) returns integer
+create or replace function update_job_image(_job_name text, _image text) returns integer
     language plpgsql
 as
 $$
@@ -297,24 +297,7 @@ alter function update_job_image(text, text) owner to postgres;
 
 grant execute on function update_job_image(text, text) to superv;
 
-create function set_request_item(_id integer, _status text) returns integer
-    language plpgsql
-as
-$$
-BEGIN
-	UPDATE public."supervisor_request"
-		SET status=_status
-		WHERE id=_id;
-
-	RETURN 0;
-END;
-$$;
-
-alter function set_request_item(integer, text) owner to postgres;
-
-grant execute on function set_request_item(integer, text) to superv;
-
-create function get_supervisor_run_def_json(_id integer) returns json
+create or replace function get_supervisor_run_def_json(_id integer) returns json
     language plpgsql
 as
 $$
@@ -340,7 +323,7 @@ alter function get_supervisor_run_def_json(integer) owner to postgres;
 
 grant execute on function get_supervisor_run_def_json(integer) to superv;
 
-create function insert_request_item(_status text, _request_data json, _request_group character varying) returns integer
+create or replace function insert_request_item(_status text, _request_data json, _request_group character varying) returns integer
     language plpgsql
 as
 $$
@@ -354,7 +337,9 @@ $$;
 
 alter function insert_request_item(text, json, varchar) owner to postgres;
 
-create function get_environment_type_names_json()
+grant execute on function insert_request_item(text, json, varchar) to superv;
+
+create or replace function get_environment_type_names_json()
     returns TABLE(x jsonb)
     language plpgsql
 as
@@ -377,7 +362,7 @@ alter function get_environment_type_names_json() owner to postgres;
 
 grant execute on function get_environment_type_names_json() to superv;
 
-create function get_dbms_image_names_json()
+create or replace function get_dbms_image_names_json()
     returns TABLE(x jsonb)
     language plpgsql
 as
@@ -400,7 +385,7 @@ alter function get_dbms_image_names_json() owner to postgres;
 
 grant execute on function get_dbms_image_names_json() to superv;
 
-create function get_os_image_names_json()
+create or replace function get_os_image_names_json()
     returns TABLE(x jsonb)
     language plpgsql
 as
@@ -423,7 +408,7 @@ alter function get_os_image_names_json() owner to postgres;
 
 grant execute on function get_os_image_names_json() to superv;
 
-create function get_test_names_json()
+create or replace function get_test_names_json()
     returns TABLE(x jsonb)
     language plpgsql
 as
@@ -446,7 +431,7 @@ alter function get_test_names_json() owner to postgres;
 
 grant execute on function get_test_names_json() to superv;
 
-create function get_supervisor_request_items_json()
+create or replace function get_supervisor_request_items_json()
     returns TABLE(document json)
     language plpgsql
 as
@@ -478,7 +463,7 @@ alter function get_supervisor_request_items_json() owner to postgres;
 
 grant execute on function get_supervisor_request_items_json() to superv;
 
-create function get_run_status_json(_request_group text DEFAULT NULL::text)
+create or replace function get_run_status_json(_request_group text DEFAULT NULL::text)
     returns TABLE(document json)
     language plpgsql
 as
@@ -504,15 +489,14 @@ BEGIN
         WHERE request_group = _request_group
         ORDER BY id
     ) d;
-
-END;
+END
 $$;
 
 alter function get_run_status_json(text) owner to postgres;
 
 grant execute on function get_run_status_json(text) to superv;
 
-create function get_test_request_names_json()
+create or replace function get_test_request_names_json()
     returns TABLE(x jsonb)
     language plpgsql
 as
@@ -535,7 +519,7 @@ alter function get_test_request_names_json() owner to postgres;
 
 grant execute on function get_test_request_names_json() to superv;
 
-create function update_run_results(_id integer, _results json) returns integer
+create or replace function update_run_results(_id integer, _results json) returns integer
     language plpgsql
 as
 $$
@@ -551,3 +535,35 @@ $$;
 alter function update_run_results(integer, json) owner to postgres;
 
 grant execute on function update_run_results(integer, json) to superv;
+
+create or replace function get_test_request_name_exists(_request_group text DEFAULT NULL::text) returns boolean
+    language plpgsql
+as
+$$
+BEGIN
+	-- does the request group name exist
+    RETURN EXISTS(SELECT request_group FROM supervisor_request WHERE request_group=_request_group);
+END;
+$$;
+
+alter function get_test_request_name_exists(text) owner to postgres;
+
+grant execute on function get_test_request_name_exists(text) to superv;
+
+create or replace function set_request_item(_id integer, _status character varying) returns integer
+    language plpgsql
+as
+$$
+BEGIN
+	UPDATE public."supervisor_request"
+		SET status=_status
+		WHERE id=_id;
+
+	RETURN 0;
+END
+$$;
+
+alter function set_request_item(integer, varchar) owner to postgres;
+
+grant execute on function set_request_item(integer, varchar) to superv;
+
