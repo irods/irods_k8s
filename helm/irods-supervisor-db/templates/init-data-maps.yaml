@@ -30,12 +30,12 @@ data:
 
     # created by:
     # pg_dump --inserts --data-only -h superv-db -d irods_superv -U postgres -W \
+    # -t dbms_image_name_lu > load-superv-data.sql
+    # -t os_image_name_lu \
+    # -t supervisor_config \
     # -t supervisor_job_location_lu \
     # -t supervisor_job_type_lu \
-    # -t supervisor_config \
     # -t test_name_lu \
-    # -t os_image_name_lu \
-    # -t dbms_image_name_lu > load-superv-data.sql
 
     psql -d irods_superv -U postgres < /docker-entrypoint-initdb.d/load-superv-data.sql
 
