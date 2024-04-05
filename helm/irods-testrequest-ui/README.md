@@ -11,7 +11,7 @@ Please see the GitHub code repo *[here](https://github.com/PhillipsOwen/irods-te
 
 ### Example helm commands for creating or removing this deployment
 
-#### Installing the this component.
+#### Installing this component.
 ```shell
 helm -n <k8s namespace> upgrade --install test-request-ui ./irods-testrequest-ui/
 ```
