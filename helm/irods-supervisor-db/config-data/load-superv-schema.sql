@@ -352,7 +352,7 @@ BEGIN
     SELECT jsonb_agg(d.type)
     FROM
         (
-            SELECT DISTINCT type FROM supervisor_config
+            SELECT DISTINCT type FROM supervisor_config ORDER BY 1
         ) d;
 
 END;
