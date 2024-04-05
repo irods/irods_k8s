@@ -5,14 +5,22 @@ SPDX-License-Identifier: BSD 3-Clause
 -->
 
 # iRODS-Test-request-UI
-This set of deployment scripts creates an irods test request app. Please see the GitHub repo at https://github.com/PhillipsOwen/irods-testrequest-ui for more information on this product.
+This set of deployment scripts creates an iRODS Test Request website. 
 
-Deployment values need to be updated to support your intended use and/or environment.
-
-Also note you will need to synchronize this deployment with the URL of the Supervisor settings web service hostname.
+Please see the GitHub code repo *[here](https://github.com/PhillipsOwen/irods-testrequest-ui)* for more information on this product.
 
 ### Example helm commands for creating or removing this deployment
 
-helm -n <**k8s namespace**> upgrade --install test-request-ui-dev ./irods-testrequest-ui/
+#### Installing the this component.
+```shell
+helm -n <**k8s namespace**> upgrade --install test-request-ui ./irods-testrequest-ui/
+```
+#### Removing this component.
+```shell
+helm -n <**k8s namespace**> delete test-request-ui
+```
 
-helm -n <**k8s namespace**> delete test-request-ui-dev
+### Deployment considerations.
+Deployment values need to be updated to support your intended use and/or environment. 
+
+You will need to specify your ingress URL of the iRODS Job Supervisor Settings web service hostname in this deployment.

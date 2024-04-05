@@ -18,6 +18,13 @@ A repo for the Kubernetes/Helm deployment scripts and charts.
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-%20v1.28.7-yellow)](https://kubernetes.io/)
 
 ## Description
-This is a repository for the Kubernetes/Helm deployment scripts and charts for the iRODS Test components.
+This is a repository for the Kubernetes/Helm deployment scripts and charts for the iRODS Test Request components.
 
-This is a list of the Helm deployments. Note that there is a README.md in each directory that explains how the component is installed.
+Each Helm deployment (application) has its own readme file that lists deployment and installation details.
+
+### Kubernetes and other component versions
+    Helm v3.12.1    
+
+    Kubernetes API v28.1.0
+    Kubernetes Client v1.28.7
+    Kubernetes Server v1.27.10
