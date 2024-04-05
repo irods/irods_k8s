@@ -13,11 +13,11 @@ Please see the GitHub code repo *[here](https://github.com/PhillipsOwen/irods-te
 
 #### Installing the this component.
 ```shell
-helm -n <**k8s namespace**> upgrade --install test-request-ui ./irods-testrequest-ui/
+helm -n <k8s namespace> upgrade --install test-request-ui ./irods-testrequest-ui/
 ```
 #### Removing this component.
 ```shell
-helm -n <**k8s namespace**> delete test-request-ui
+helm -n <k8s namespace> delete test-request-ui
 ```
 
 ### Deployment considerations.
