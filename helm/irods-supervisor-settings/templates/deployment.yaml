@@ -84,6 +84,9 @@ spec:
           - name: LONG_BATCH_SIZE
             value: {{ .Values.jobLongBatchSize | quote}}
 
+          - name: TEST_RESULT_PATH
+            value: {{ .Values.volumes.mountPath | quote}}
+
           volumeMounts:
             - name:  {{ .Values.volumes.name }}
               mountPath: {{ .Values.volumes.mountPath }}
