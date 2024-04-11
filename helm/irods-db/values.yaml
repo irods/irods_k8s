@@ -49,14 +49,12 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-initDB:
+irodsInitDB:
   irods_mysql: false
   irods_postgres: true
   user: "irods"
   password: "testpassword"
   initScript: "init-irods-pg-db.sh"
-# mysql script name
-#  initScript: "init-irods-mysql-db.sh"
 
 # postgres env params
 envParams:

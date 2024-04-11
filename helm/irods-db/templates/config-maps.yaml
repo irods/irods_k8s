@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: BSD 3-Clause
 
-{{ if .Values.initDB }}
+{{ if .Values.irodsInitDB }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -20,7 +20,7 @@ data:
     # Check to see if the apsviz_gauge DB and user exist. if not create them
     psql -v ON_ERROR_STOP=1 --username "{{ .Values.envParams.param1.envParamValue }}" <<-EOSQL
         CREATE DATABASE "ICAT";
-        CREATE ROLE "{{ .Values.initDB.user }}" WITH LOGIN SUPERUSER CREATEDB CREATEROLE INHERIT NOREPLICATION CONNECTION LIMIT -1 PASSWORD '{{ .Values.initDB.password }}';
+        CREATE ROLE "{{ .Values.irodsInitDB.user }}" WITH LOGIN SUPERUSER CREATEDB CREATEROLE INHERIT NOREPLICATION CONNECTION LIMIT -1 PASSWORD '{{ .Values.irodsInitDB.password }}';
         GRANT ALL PRIVILEGES ON DATABASE "ICAT" TO irods;
     EOSQL
   {{- end }}
@@ -32,6 +32,6 @@ data:
     # helpful cli to determine startup was successful
     # mysql> SELECT user FROM mysql.user;
     # mysql> show databases;
-    mysql -uroot -p {{ .Values.envParams.param2.envParamValue }} -e "CREATE DATABASE ICAT; CREATE USER '{{ .Values.initDB.user }}'@'localhost'; GRANT ALL ON ICAT.* to '{{ .Values.initDB.user }}'@'localhost';"
+    mysql -uroot -p {{ .Values.envParams.param2.envParamValue }} -e "CREATE DATABASE ICAT; CREATE USER '{{ .Values.irodsInitDB.user }}'@'localhost'; GRANT ALL ON ICAT.* to '{{ .Values.irodsInitDB.user }}'@'localhost';"
   {{ end }}
 {{ end }}

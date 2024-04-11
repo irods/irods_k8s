@@ -51,10 +51,10 @@ spec:
           volumeMounts:
           - name: {{ .Values.storage.name }}
             mountPath: {{ .Values.storage.dataMountPath }}
-          {{- if .Values.initDB }}
+          {{- if .Values.irodsInitDB }}
           - name: init-db-script
             mountPath: /docker-entrypoint-initdb.d/001-init-irods-db.sh
-            subPath: {{ .Values.initDB.initScript | quote }}
+            subPath: {{ .Values.irodsInitDB.initScript | quote }}
           {{- end }}
       volumes:
       - name: {{ .Values.storage.name }}

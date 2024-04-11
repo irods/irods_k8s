@@ -62,6 +62,13 @@ base_config:
   nfs_path: "/some_path"
   nfs_mount: "/some_mount"
 
+irodsInitDB:
+  postgres: true
+  user: "irods"
+  password: "testpassword"
+  initScript: "init-irods-pg-db.sh"
+  pg_user: "postgres"
+
 resources:
   limits:
     ephemeral-storage: 64Mi
