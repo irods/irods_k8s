@@ -5,7 +5,7 @@ SPDX-License-Identifier: BSD 3-Clause
 -->
 
 # iRODS-DB
-This set of deployment scripts creates an irods database. Postgres or MySQL DBMS types are supported.
+This set of deployment scripts creates an irods database. Postgres or MySQL DBMS types are supported. This deployment is for test purposes only.
 
 ### Example helm commands for creating or removing this deployment.
 

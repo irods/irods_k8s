@@ -5,7 +5,7 @@ SPDX-License-Identifier: BSD 3-Clause
 -->
 
 # iRODS-Service
-This set of deployment scripts creates an irods consumer or provider for testing purposes only.
+This set of deployment scripts creates an irods consumer or provider. This deployment is for testing purposes only.
 
 ### Example helm commands for creating or removing this deployment.
 
