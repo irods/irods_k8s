@@ -30,7 +30,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ "npm", "run", "start"]
+          #command: [ "npm", "run", "start"]
           env:
           - name: SYSTEM
             value: {{ .Values.system }}
