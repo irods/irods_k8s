@@ -47,10 +47,10 @@ spec:
       containers:
         - name: {{ include "irods-service.fullname" . }}
           command: [ '/bin/bash' , '-c']
-          {{- if not .Values.serviceInit.isProvider }}
-          args: [ '{{ .Values.serviceInit.initScriptMountPath }} && until false; do sleep 2147483647d; done;' ]
+          {{- if .Values.serviceInit.isProvider }}
+          args: [ '{{ .Values.serviceInit.initScriptMountPath }} && sleep infinity;' ]
           {{- else }}
-          args: ['until false; do sleep 2147483647d; done;']
+          args: ['sleep infinity;']
           {{- end }}
 
           {{- if .Values.securityContext}}
@@ -91,6 +91,12 @@ spec:
           - name: dsd-script
             mountPath: /irods/dsd.py
             subPath: "dsd.py"
+          - name: rsyslog
+            mountPath: /etc/rsyslog.conf
+            subPath: rsyslog.conf
+          - name: 50-default
+            mountPath: /etc/rsyslog.d/50-default.conf
+            subPath: "50-default.conf"
           {{- if .Values.storage.var }}
           - name: {{ .Values.storage.var.name }}
             mountPath: {{ .Values.storage.var.mountPath }}
@@ -136,6 +142,18 @@ spec:
           configMap:
             name: "{{- include "irods-service.fullname" . }}-scripts"
             defaultMode: 0777
+        - name: 00-irods
+          configMap:
+            name: "{{- include "irods-service.fullname" . }}-scripts"
+            defaultMode: 511
+        - name: 50-default
+          configMap:
+            name: "{{- include "irods-service.fullname" . }}-scripts"
+            defaultMode: 511
+        - name: rsyslog
+          configMap:
+            name: "{{- include "irods-service.fullname" . }}-scripts"
+            defaultMode: 511
       {{- if .Values.storage.opt }}
         - name: {{ .Values.storage.opt.name }}
           persistentVolumeClaim:

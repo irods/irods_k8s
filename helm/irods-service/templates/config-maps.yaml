@@ -19,6 +19,36 @@ data:
     :programname,startswith,"irodsDelayServer" /var/log/irods/irods.log;irods_format
     & stop
 
+  50-default.conf: |-
+    #  Default rules for rsyslog.
+    auth,authpriv.*                 /var/log/auth.log
+    *.*;auth,authpriv.none          -/var/log/syslog
+    #cron.*                         /var/log/cron.log
+    #daemon.*                       -/var/log/daemon.log
+    kern.*                          -/var/log/kern.log
+    #lpr.*                          -/var/log/lpr.log
+    mail.*                          -/var/log/mail.log
+    #user.*                         -/var/log/user.log
+    mail.err                        /var/log/mail.err
+    *.emerg                         :omusrmsg:*
+
+  rsyslog.conf: |-
+    # Default logging rules can be found in /etc/rsyslog.d/50-default.conf
+
+    module(load="imuxsock") # provides support for local system logging
+    module(load="imklog" permitnonkernelfacility="on")
+    $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+    $RepeatedMsgReduction on
+    $FileOwner syslog
+    $FileGroup adm
+    $FileCreateMode 0640
+    $DirCreateMode 0755
+    $Umask 0022
+    $PrivDropToUser syslog
+    $PrivDropToGroup syslog
+    $WorkDirectory /var/spool/rsyslog
+    $IncludeConfig /etc/rsyslog.d/*.conf
+
   irods: |-
     /var/log/irods/irods.log {
         weekly
@@ -151,14 +181,42 @@ data:
 
 {{- if .Values.serviceInit.isProvider }}
   irodsProviderInstall.sh: |-
+    #!/bin/bash
+    # this script is for runs that only have a provider, no consumers.
+    # if a provider test is specified in the request it is run.
+
+    # install OS updates
     apt-get update;
     apt-get -y upgrade;
+    apt-get -y install jq netcat;
     apt-get -y install irods-server irods-database-plugin-postgres;
     apt-get autoclean;
-    sed 's/HOSTNAME_TEMPLATE/'"${HOSTNAME}"'/g' {{ .Values.serviceInit.serviceInitMountPath }} > /tmp/providerInit.json;
-    python3 /var/lib/irods/scripts/setup_irods.py --json_configuration_file /tmp/providerInit.json;
+
+    # host names come in the form <name of deploy>_<OS version>, ex: provider_2004
+    # break it into pieces and create hostname entries for irods and save them in a file on a shared directory.
+    HN_arr=(${HOSTNAME//-/ });
+    HOST_SERVICE_NAME="${HN_arr[0]}-${HN_arr[1]}";
+    LOCAL_HOST_ENTRY='{"address_type": "local","addresses": ["'${HN_arr[0]}'-'${HN_arr[1]}'","'${HOSTNAME}'"]}';
+    echo "${LOCAL_HOST_ENTRY}" >> /tmp/local_PROVIDER_host_entries;
+
+    # replace the hostname and db name in the provider initialization json
+    sed 's/HOSTNAME_TEMPLATE/'"${HOST_SERVICE_NAME}"'/g' {{ .Values.serviceInit.serviceInitMountPath }} > /tmp/providerInit.json.1;
+
+    # add the provider host data to the init
+    jq --slurpfile hosts /tmp/local_PROVIDER_host_entries '.server_config.host_resolution.host_entries = $hosts' < /tmp/providerInit.json.1 > /tmp/providerInit.json.2;
+
+    # setup irods and start it
+    python3 /var/lib/irods/scripts/setup_irods.py --json_configuration_file /tmp/providerInit.json.2;
+
+    # switch to the irods user and start the service
     su - irods -c './irodsctl start -v';
-    until false; do sleep 2147483647d; done;
+
+    # update the hostname in the db to be the short version
+    # this should help prevent catalog hostname issues on a pod restart
+    su - irods -c "iadmin modresc demoResc host ${HOST_SERVICE_NAME}";
+
+    # leave this service running
+    sleep infinity;
 
   providerInit.json: |-
     {
@@ -257,10 +315,10 @@ data:
           "database": {
             "postgres": {
               "db_host": "{{ .Values.serviceInit.dbHostName }}",
-              "db_name": "ICAT",
-              "db_odbc_driver": "PostgreSQL ANSI",
-              "db_password": "{{ .Values.serviceInit.dbPassword }}",
               "db_port": 5432,
+              "db_odbc_driver": "PostgreSQL ANSI",
+              "db_name": "ICAT",
+              "db_password": "{{ .Values.serviceInit.dbPassword }}",
               "db_username": "{{ .Values.serviceInit.dbUsername }}"
             }
           },
