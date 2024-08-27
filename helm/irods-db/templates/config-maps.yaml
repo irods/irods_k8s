@@ -9,7 +9,7 @@ kind: ConfigMap
 metadata:
   name: "{{- include "irods-db.fullname" . }}-scripts"
 data:
-  {{- if .Values.initDB.irods_postgres }}
+  {{- if .Values.irodsInitDB.irods_postgres }}
   init-irods-pg-db.sh: |-
     #!/bin/sh
     set -e
@@ -26,7 +26,7 @@ data:
   {{- end }}
 
 
-  {{- if .Values.initDB.irods_mysql}}
+  {{- if .Values.irodsInitDB.irods_mysql}}
   init-irods-mysql-db.sh: |-
     #!/bin/sh
     # helpful cli to determine startup was successful
