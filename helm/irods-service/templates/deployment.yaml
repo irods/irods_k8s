@@ -109,7 +109,10 @@ spec:
           - name: {{ .Values.storage.zone.name }}
             mountPath: {{ .Values.storage.zone.mountPath }}
           {{- end }}
-      {{- with .Values.nodeSelector }}
+          {{- if .Values.storage.tmp }}
+          - name: {{ .Values.storage.tmp.name }}
+            mountPath: {{ .Values.storage.tmp.mountPath }}
+          {{- end }}      {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -168,4 +171,9 @@ spec:
         - name: {{ .Values.storage.zone.name }}
           persistentVolumeClaim:
             claimName: {{ include "irods-service.fullname" . }}-zone-pvc
+      {{- end }}
+      {{- if .Values.storage.tmp }}
+        - name: {{ .Values.storage.tmp.name }}
+          persistentVolumeClaim:
+            claimName: {{ include "irods-service.fullname" . }}-tmp-pvc
       {{- end }}

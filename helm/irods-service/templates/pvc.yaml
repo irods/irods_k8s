@@ -14,6 +14,9 @@ spec:
   resources:
     requests:
       storage: {{ .Values.storage.opt.size }}
+    {{- if .Values.storage.className }}
+  storageClassName: {{ .Values.storage.className }}
+    {{ end }}
 {{ end }}
 {{ if .Values.storage.var }}
 ---
@@ -27,6 +30,9 @@ spec:
   resources:
     requests:
       storage: {{ .Values.storage.var.size }}
+    {{- if .Values.storage.className }}
+  storageClassName: {{ .Values.storage.className }}
+    {{ end }}
 {{ end }}
 {{ if .Values.storage.zone }}
 ---
@@ -40,4 +46,23 @@ spec:
   resources:
     requests:
       storage: {{ .Values.storage.zone.size }}
+    {{- if .Values.storage.className }}
+  storageClassName: {{ .Values.storage.className }}
+    {{ end }}
+{{ end }}
+{{ if .Values.storage.tmp }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "irods-service.fullname" . }}-tmp-pvc
+spec:
+  accessModes:
+  - {{ .Values.storage.zone.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.tmp.size }}
+    {{- if .Values.storage.className }}
+  storageClassName: {{ .Values.storage.className }}
+    {{ end }}
 {{ end }}
